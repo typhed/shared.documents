@@ -1,0 +1,18 @@
+packages:
+  - "apps/*"
+  # The shared repositories are mounted as git submodules and their packages
+  # join this workspace directly, so @typhed/ui and @typhed/brand resolve the
+  # same way a local package would. An empty shared/ directory means the
+  # submodules were never initialised: run
+  #   git submodule update --init --recursive
+  - "shared/components/packages/*"
+  - "shared/documents/brand"
+
+# Native / postinstall build scripts are opt-in. A static export does not use
+# sharp (images are unoptimized) and the lint import resolver works without its
+# native binary, so both are declined. The @clerk/shared postinstall only prints
+# a telemetry notice, so it is declined too.
+allowBuilds:
+  '@clerk/shared': false
+  sharp: false
+  unrs-resolver: false

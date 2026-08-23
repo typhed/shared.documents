@@ -1,0 +1,49 @@
+{
+  "nav": [
+    { "label": "Our Products", "href": "#" },
+    { "label": "About Us", "href": "/about" }
+  ],
+  "loginCta": { "label": "Login / Sign Up", "href": "#" },
+  "footer": {
+    "products": {
+      "heading": "PRODUCTS",
+      "links": [
+        { "label": "TyPhed Trading", "href": "https://trading.typhed.com/", "external": true },
+        { "label": "Products Pricing", "href": "#" }
+      ]
+    },
+    "resources": {
+      "heading": "RESOURCES",
+      "links": [
+        { "label": "TyPhed BLOG", "href": "https://blog.typhed.com/", "external": true },
+        { "label": "Case Studies", "href": "#" },
+        {
+          "label": "Career Page",
+          "href": "https://www.linkedin.com/company/typhed/",
+          "external": true
+        }
+      ]
+    }
+  },
+  "social": [
+    { "label": "GitHub", "href": "https://github.com/typhed", "icon": "github", "external": true },
+    {
+      "label": "LinkedIn",
+      "href": "https://www.linkedin.com/company/typhed/",
+      "icon": "linkedin",
+      "external": true
+    },
+    {
+      "label": "Contact",
+      "href": "mailto:pramanik.huf@gmail.com",
+      "icon": "mail",
+      "external": false
+    }
+  ],
+  "contactEmail": "pramanik.huf@gmail.com",
+  "privacy": { "label": "Privacy Policy", "href": "#" },
+  "copyright": {
+    "line1Template": "Copyright © {year} TyPhed - Engineering Tomorrow",
+    "line2": "This Brand is Maintained and Owned by Debmalya Pramanik HUF"
+  }
+}

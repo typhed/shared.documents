@@ -1,0 +1,16 @@
+{
+  "_comment": "Layout primitives the Tailwind preset configures. The step scale itself is stock Tailwind and is documented, not configured, in docs/design/spacing.yml.",
+  "container": {
+    "center": true,
+    "padding": "1.5rem",
+    "screens": { "2xl": "1400px" }
+  },
+  "radius": {
+    "base": "0.85rem",
+    "scale": {
+      "lg": "var(--radius)",
+      "md": "calc(var(--radius) - 2px)",
+      "sm": "calc(var(--radius) - 4px)"
+    }
+  }
+}

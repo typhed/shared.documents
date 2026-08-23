@@ -1,0 +1,385 @@
+# =============================================================================
+# TyPhed Landing Page - Spacing System (single source of truth for layout work)
+# =============================================================================
+#
+# READ THIS FIRST. Reference this file before changing ANY padding, margin,
+# gap, width, height, or breakpoint on the website. It documents the scale the
+# site is built on, the horizontal gutter rules, the vertical rhythm, the fixed
+# component sizes, and the sync pairs that break silently when only one half is
+# edited.
+#
+# Sibling references: docs/design/typography.yml (type scale, fonts, headings)
+# and docs/design/colors.yml (every color token).
+#
+# -----------------------------------------------------------------------------
+# HOW SPACING WORKS (architecture)
+# -----------------------------------------------------------------------------
+# There is NO custom spacing scale. shared/components/packages/config-tailwind/tailwind.config.js
+# extends `container`, `borderRadius`, `fontFamily`, `keyframes`, and
+# `animation` only, so every p-*, m-*, gap-*, h-*, and w-* utility resolves to
+# Tailwind's stock 0.25rem (4px) step scale on a 16px root.
+#
+# Spacing is expressed in exactly three ways, and each has its own job:
+#
+#  1) STEP UTILITIES  (p-6, gap-4, mt-2, h-16 ...)
+#     The default for everything: chrome, components, primitives. Stay on the
+#     scale. A value that is not on the scale needs a reason.
+#
+#  2) THE CONTAINER   (.container)
+#     The single horizontal gutter authority for site chrome (header, footer,
+#     mobile panel). Centered, 1.5rem gutters, one max-width step at 1400px.
+#
+#  3) FLUID CLAMPS    (py-[clamp(1rem,3vh,3rem)] ...)
+#     Vertical rhythm INSIDE full-height snap sections only. The middle term is
+#     vh, so a whole section keeps fitting one viewport on short screens where
+#     fixed rem values would overflow and break the snap.
+#
+# Never mix (3) into ordinary components. Fluid vertical rhythm exists to make
+# min-h-dvh sections survive a 600px-tall laptop window, nothing else.
+# =============================================================================
+
+meta:
+  project: "TyPhed - Engineering Tomorrow"
+  owner: "Debmalya Pramanik HUF"
+  source_of_truth: "shared/components/packages/config-tailwind/tailwind.config.js + the component classNames listed below"
+  scale: "Tailwind default: 1 step = 0.25rem = 4px, on a 16px root"
+  custom_spacing_scale: "none - theme.extend defines no `spacing` key"
+  gutter: "1.5rem (24px) for chrome via .container; 1rem -> 1.5rem for full-height sections via px-4 sm:px-6"
+  page_model: "single-page vertical scroll of min-h-dvh sections with proximity snapping"
+  radius_token: "--radius: 0.85rem (13.6px), identical in both themes"
+
+# =============================================================================
+# THE STEP SCALE  (which steps this site actually uses)
+# =============================================================================
+# Everything below is stock Tailwind. Listed so a reviewer can see the working
+# vocabulary at a glance and stay inside it instead of inventing new steps.
+scale:
+  step: "0.25rem (4px)"
+  in_use:
+    "0.5": "0.125rem / 2px   - hover lift (-translate-y-0.5) on the ScrollToTop chevron"
+    "1": "0.25rem / 4px    - gap-1 (mobile menu link stack, footer link to its external arrow), px-1 (theme toggle track inset), space-y-1 (copyright lines)"
+    "1.5": "0.375rem / 6px   - gap-1.5 (countdown tiles on mobile), space-y-1.5 (CardHeader)"
+    "2": "0.5rem / 8px     - mt-2, mb-2, py-2 - the default micro gap between a label and what it labels"
+    "2.5": "0.625rem / 10px  - h-2.5 (launch progress track height)"
+    "3": "0.75rem / 12px   - gap-3 (footer link stacks, social row, BrandMark), px-3, mt-3"
+    "3.5": "0.875rem / 14px  - h-3.5 w-3.5 (the footer external link arrow, sized to its 14px label)"
+    "4": "1rem / 16px      - gap-4 (header row), py-4 (mobile panel), px-4, mt-4"
+    "6": "1.5rem / 24px    - gap-6 (desktop nav), p-6 (Card), py-6 (footer bottom bar), mt-6, bottom-6"
+    "8": "2rem / 32px      - px-8 (Button size lg)"
+    "9": "2.25rem / 36px   - sm:mb-9 (colon separator lift, aligns it to the tile baseline)"
+    "10": "2.5rem / 40px    - gap-10 (footer grid)"
+    "16": "4rem / 64px      - h-16 (header), py-16 (footer body)"
+  note: >
+    Arbitrary values appear in exactly two places: the fluid clamp() rhythm in
+    the full-height sections, and the decorative orb sizes in
+    AbstractBackground (h-[34rem], blur-[120px] and friends). Both are
+    deliberate. Everything else stays on the scale.
+
+# =============================================================================
+# CONTAINER  (shared/components/packages/config-tailwind/tailwind.config.js -> theme.container)
+# =============================================================================
+container:
+  config:
+    center: true
+    padding: "1.5rem"       # applied at every viewport, no responsive padding map
+    screens:
+      "2xl": "1400px"
+  compiled_css: |
+    .container { width: 100%; margin-right: auto; margin-left: auto;
+                 padding-right: 1.5rem; padding-left: 1.5rem }
+    @media (min-width: 1400px) { .container { max-width: 1400px } }
+  behaviour: >
+    Fluid to the full viewport width up to 1400px, then capped at 1400px and
+    centered. Gutters are a constant 1.5rem on both sides at every size.
+  gotcha_single_breakpoint: >
+    Declaring `screens` under `container` REPLACES the container's breakpoint
+    map. Because only 2xl is declared, the container has no intermediate
+    max-widths - stock Tailwind would step at 640/768/1024/1280/1536, this one
+    does not. That is intentional (a fluid measure with fixed gutters), but it
+    means "the container looks too wide on a 1200px laptop" is expected
+    behaviour, not a bug.
+  gotcha_not_a_variant: >
+    container.screens does NOT move the `sm:` / `md:` / `lg:` / `xl:` / `2xl:`
+    variant breakpoints. Those stay on Tailwind's defaults (see breakpoints
+    below). The 1400px value governs the container max-width only.
+  used_by:
+    - "site-header.tsx      - the h-16 header row"
+    - "mobile-nav.tsx       - the open panel's nav column"
+    - "site-footer.tsx      - the column grid (py-16) and the bottom bar (py-6)"
+  deliberately_not_used_by:
+    - "wip-landing.tsx      - full-height centered section, uses px-4 sm:px-6"
+    - "app/about/page.tsx   - same pattern"
+  reason: >
+    Chrome is a measured content column and belongs in the container. The
+    full-height sections are centered viewport canvases whose content is bounded
+    per element (max-w-xl on the paragraph, max-w-md on the progress bar), so a
+    container would add a second, redundant constraint.
+
+# =============================================================================
+# BREAKPOINTS  (stock Tailwind - never overridden)
+# =============================================================================
+breakpoints:
+  sm: "640px   - the main size step-up: gaps, tile sizes, font sizes, footer grid to 2 columns"
+  md: "768px   - the navigation switch: desktop nav and auth slot appear, hamburger disappears"
+  lg: "1024px  - footer grid to its ten track 20 / 30 / 30 / 20 split"
+  xl: "1280px  - unused on the site today"
+  "2xl": "1536px  - unused as a variant; 1400px is the container cap, a different number"
+  responsive_pattern: >
+    Mobile-first. The base classes describe the small screen and `sm:` / `md:` /
+    `lg:` add to it. There are no max-width variants anywhere in the codebase.
+
+# =============================================================================
+# HORIZONTAL SPACING
+# =============================================================================
+horizontal:
+
+  page_gutters:
+    chrome: ".container -> 1.5rem (24px) each side, all viewports"
+    sections: "px-4 (1rem) -> sm:px-6 (1.5rem) on wip-landing.tsx and about/page.tsx"
+    rule: "New chrome uses the container. A new full-height section uses px-4 sm:px-6 to match the existing two."
+
+  header_row:
+    file: "shared/components/packages/ui/components/site-header.tsx"
+    outer: ".container flex h-16 items-center justify-between gap-4"
+    right_cluster: "gap-2 -> sm:gap-4 (nav + auth slot + theme toggle + hamburger)"
+    desktop_nav: "gap-6 between nav links, hidden below md"
+    note: "gap-4 is the minimum breathing room between the logo and the right cluster when the row compresses."
+
+  footer_grid:
+    file: "shared/components/packages/ui/components/site-footer.tsx"
+    grid: "grid-cols-1 -> sm:grid-cols-2 -> lg:grid-cols-10"
+    gap: "gap-10 (2.5rem) both axes"
+    lg_split: >
+      20 / 30 / 30 / 20, written as spans of ten equal tracks: brand
+      lg:col-span-2, each of the two nav columns lg:col-span-3, contact
+      lg:col-span-2. The ten tracks exist only to make those percentages
+      exact. Move the split by editing the spans, never by adding a width.
+    brand_column: "sm:col-span-2 lg:col-span-2, flex items-center - the lockup centres against the taller nav columns"
+    column_internals:
+      heading_to_links: "mt-4 (1rem)"
+      link_stack: "flex flex-col gap-3 (0.75rem)"
+      link_row: "inline-flex w-fit items-center gap-1 (0.25rem) - w-fit keeps the hover target on the text"
+      contact_to_social_block: "mt-6 (1.5rem)"
+      social_row: "flex items-center gap-3 (0.75rem)"
+    bottom_bar: "container flex flex-col gap-4 py-6, sm:flex-row sm:items-center sm:justify-between"
+
+  countdown_row:
+    file: "shared/components/packages/ui/components/countdown-timer.tsx"
+    tile_gap: "gap-1.5 (6px) -> sm:gap-4 (16px)"
+    label_offset: "mt-3 (0.75rem) below each tile"
+    colon_separator: "hidden below sm; sm:mb-9 (2.25rem) lifts it off the label row onto the digit baseline"
+    guard: "max-w-full on the row so four tiles plus gaps never force a horizontal scrollbar"
+
+  centering_idioms:
+    container: "center: true (margin-inline auto)"
+    fixed_element: "left-1/2 with -translate-x-1/2 - ScrollToTop"
+    flex: "items-center justify-center - the full-height sections and every icon button"
+
+# =============================================================================
+# VERTICAL SPACING
+# =============================================================================
+vertical:
+
+  section_model:
+    classes: "relative flex min-h-dvh snap-start flex-col items-center justify-center"
+    files:
+      - "shared/components/packages/ui/components/wip-landing.tsx"
+      - "apps/web/app/about/page.tsx"
+    unit: "dvh (dynamic viewport height) - correct under mobile browser chrome that grows and shrinks"
+    snap: "scroll-snap-type: y proximity on <html> (globals.css); proximity never traps a visitor on a short section"
+    padding: "py-[clamp(1rem,3vh,3rem)] - the section's own top/bottom breathing room"
+
+  sync_pair_header_height:
+    header: "h-16 = 4rem (shared/components/packages/ui/components/site-header.tsx)"
+    scroll_padding: "scroll-padding-top: 4rem (apps/web/app/globals.css)"
+    rule: >
+      These two MUST move together. scroll-padding-top offsets both snap targets
+      and #anchor jumps by the sticky header's height. Change the header height
+      alone and every snapped section, plus every in-page anchor, lands with its
+      top 4rem under the header.
+
+  fluid_rhythm:
+    why: >
+      The hero has to fit one viewport: headline, paragraph, countdown, progress
+      bar, and launch line. Fixed rem gaps overflow a short laptop window and the
+      section stops behaving as a single snap target. Each gap is therefore
+      clamp(floor, vh, ceiling): it collapses toward the floor on short screens
+      and opens to the ceiling on tall ones.
+    steps:
+      section_padding:
+        class: "py-[clamp(1rem,3vh,3rem)]"
+        range: "16px -> 48px"
+        where: "wip-landing.tsx, about/page.tsx"
+      h1_to_paragraph:
+        class: "mt-[clamp(0.75rem,2.5vh,1.75rem)]"
+        range: "12px -> 28px"
+        where: "wip-landing.tsx, about/page.tsx"
+      paragraph_to_countdown:
+        class: "mt-[clamp(1rem,4vh,3rem)]"
+        range: "16px -> 48px"
+        where: "wip-landing.tsx"
+      countdown_to_progress:
+        class: "mt-[clamp(0.75rem,3vh,2.5rem)]"
+        range: "12px -> 40px"
+        where: "wip-landing.tsx"
+      progress_to_launch_line:
+        class: "mt-[clamp(0.5rem,2.5vh,2rem)]"
+        range: "8px -> 32px"
+        where: "wip-landing.tsx"
+    ordering_note: >
+      The clamps are not uniform on purpose. The largest gap sits above the
+      countdown (the visual anchor) and they taper downward, so the block reads
+      as one group rather than five evenly spaced rows.
+
+  chrome_rhythm:
+    header_height: "h-16 (4rem / 64px)"
+    mobile_panel: "py-4 (1rem) on the nav column; links px-3 py-2; auth slot / CTA mt-2"
+    footer_body: "container py-16 (4rem)"
+    footer_bottom_bar: "container py-6 (1.5rem), gap-4 when stacked below sm"
+    copyright_lines: "space-y-1 (0.25rem) between the two lines"
+
+  component_rhythm:
+    launch_progress:
+      label_row_to_track: "mb-2 (0.5rem)"
+      track_to_caption: "mt-2 (0.5rem)"
+    countdown_done_state:
+      headline_to_subtext: "mt-2 (0.5rem)"
+    card_primitive:
+      header: "p-6 with space-y-1.5 between title and description"
+      content: "p-6 pt-0"
+      footer: "p-6 pt-0"
+      note: "Card is a ready primitive; no site surface renders it yet."
+
+# =============================================================================
+# FIXED COMPONENT SIZES  (heights, widths, hit areas)
+# =============================================================================
+sizes:
+
+  button:
+    file: "shared/components/packages/ui/components/ui/button.tsx"
+    default: "h-10 px-4 py-2   (40px tall)"
+    sm: "h-9 px-3        (36px tall) - the header CTA and mobile CTA"
+    lg: "h-11 px-8       (44px tall) - unused on the site today"
+    icon: "h-10 w-10       (40px square) - the hamburger"
+    icon_slot: "[&_svg]:size-4 - every icon inside a Button is forced to 1rem"
+    inner_gap: "gap-2 between icon and label"
+
+  theme_toggle:
+    file: "shared/components/packages/ui/components/theme-toggle.tsx"
+    track: "h-8 w-14 (32 x 56px) rounded-full, px-1 inset"
+    knob: "h-6 w-6 (24px), travels translate-x-0 -> translate-x-6 (24px)"
+    track_glyphs: "h-3.5 w-3.5 (14px), pinned left-1.5 and right-1.5"
+
+  scroll_to_top:
+    file: "shared/components/packages/ui/components/scroll-to-top.tsx"
+    button: "h-10 w-10 (40px) rounded-full, fixed bottom-6 left-1/2 -translate-x-1/2"
+    icon: "h-5 w-5 (20px), hover lifts the button -translate-y-1 and the chevron -translate-y-0.5"
+    reveal_threshold: "window.scrollY > 400px"
+
+  countdown_tile:
+    file: "shared/components/packages/ui/components/countdown-timer.tsx"
+    tile: "h-20 w-14 (80 x 56px) -> sm:h-28 sm:w-24 (112 x 96px)"
+    top_highlight: "absolute inset-x-4 top-0 h-px - a 1px hairline inset 1rem from each edge"
+    radius: "rounded-2xl (1rem) - NOT the --radius token, see radius.gotcha"
+
+  launch_progress:
+    file: "shared/components/packages/ui/components/launch-progress.tsx"
+    track: "h-2.5 (10px) w-full rounded-full"
+    block_width: "max-w-md (28rem / 448px), set by the caller in wip-landing.tsx"
+
+  brand:
+    mark: "h-9 w-9 (36px) img, gap-3 to the wordmark - shared/components/packages/ui/components/brand-mark.tsx"
+    lockup: "h-auto w-auto by default; the footer sets w-48 (12rem) -> sm:w-56 (14rem)"
+
+  social_icon_button:
+    file: "shared/components/packages/ui/components/site-footer.tsx"
+    button: "h-9 w-9 (36px) rounded-full"
+    icon: "h-4 w-4 (16px)"
+
+  external_link_arrow:
+    file: "shared/components/packages/ui/components/site-footer.tsx"
+    icon: "h-3.5 w-3.5 (14px) ArrowUpRight, gap-1 (4px) after the label"
+    why: "14px matches the text-sm label, so the glyph reads as part of the words rather than as a separate control."
+
+  measure_caps:
+    hero_paragraph: "max-w-xl (36rem / 576px) - wip-landing.tsx, about/page.tsx"
+    progress_block: "max-w-md (28rem / 448px)"
+    countdown_row: "max-w-full - an overflow guard, not a measure"
+    page: "container 1400px at >= 1400px viewports"
+
+  touch_targets: >
+    The smallest interactive control is 36px (Button size sm, the social icon
+    buttons). Do not go below that; the theme toggle's 32px track is a switch
+    with a 56px wide hit area, which clears the same bar horizontally.
+
+# =============================================================================
+# RADIUS  (brand/tokens/spacing.json radius + the preset's borderRadius map)
+# =============================================================================
+radius:
+  token: "--radius: 0.85rem - declared identically in :root and .dark"
+  map:
+    lg: "var(--radius)            -> 13.6px - Card"
+    md: "calc(var(--radius) - 2px) -> 11.6px - Button, mobile menu links, the header logo focus ring"
+    sm: "calc(var(--radius) - 4px) -> 9.6px  - unused on the site today"
+  off_token_values:
+    rounded-2xl: "1rem / 16px - countdown tiles"
+    rounded-full: "9999px - theme toggle track and knob, ScrollToTop, social buttons, progress track and fill"
+  gotcha: >
+    rounded-2xl and rounded-full are Tailwind defaults and do NOT read --radius.
+    Editing the token moves Card and Button but leaves the countdown tiles and
+    every pill untouched. If you re-scale the radius system, walk those call
+    sites by hand.
+
+# =============================================================================
+# STACKING  (z-index, since layering is part of the layout contract)
+# =============================================================================
+stacking:
+  "-z-10": "AbstractBackground - fixed inset-0, sits behind everything"
+  "z-10": "the content column (header + main + footer wrapper) and the footer itself"
+  "z-40": "SiteHeader (sticky top-0) and ScrollToTop (fixed bottom-center)"
+  "z-50": "the open mobile menu panel, so it clears the sticky header it hangs from"
+  anchoring_note: >
+    The mobile panel is positioned with `absolute inset-x-0 top-full` against
+    the sticky <header>. The header is the positioned ancestor; removing
+    `sticky` from it would drop the panel to the page instead of the header.
+
+# =============================================================================
+# GLOBAL LAYOUT RULES  (apps/web/app/globals.css)
+# =============================================================================
+global_css:
+  html_body_height: "height: 100% on both, plus min-h-dvh on the body and the content column"
+  scroll_snap: "scroll-snap-type: y proximity"
+  scroll_padding: "scroll-padding-top: 4rem (the header height sync pair)"
+  smooth_scroll: "scroll-behavior: smooth, only inside @media (prefers-reduced-motion: no-preference)"
+  scrollbars: >
+    Hidden in every engine (scrollbar-width: none, -ms-overflow-style: none,
+    ::-webkit-scrollbar { display: none }) while scrolling itself is untouched.
+    Nothing in the layout should therefore reserve gutter width for a scrollbar.
+
+# =============================================================================
+# HOW TO CHANGE SPACING  (do this, not that)
+# =============================================================================
+change_guide:
+  to_adjust_ordinary_spacing:
+    - "Use the step scale. p-6 / gap-4 / mt-2, not p-[23px]."
+    - "Inside a flex or grid row, space children with gap-*, not with margins on the children."
+    - "Add responsive spacing mobile-first: base class, then sm: / md: / lg: on top."
+  to_adjust_a_full_height_section:
+    - "Keep min-h-dvh + snap-start, or the section stops behaving as a snap target."
+    - "Use clamp(floor, Nvh, ceiling) for vertical gaps so the section still fits a short window."
+    - "Test at roughly 600px viewport height before shipping; that is where fixed spacing breaks."
+  to_change_the_header_height:
+    - "Edit h-16 in shared/components/packages/ui/components/site-header.tsx."
+    - "Edit scroll-padding-top in apps/web/app/globals.css to the SAME value."
+    - "Re-check the mobile panel, which hangs off the header via top-full."
+  to_change_the_page_width:
+    - "Edit theme.container.padding (gutters) or theme.container.screens (the cap) in the shared preset."
+    - "Both changes hit every app that consumes the preset, not just apps/web."
+  to_add_a_spacing_token:
+    - "Prefer an existing step. If a genuinely new value is needed, add theme.extend.spacing in the preset."
+    - "Then record it in the `scale.in_use` block above, or the next reader will not know it exists."
+  do_not:
+    - "Do not put clamp() vertical rhythm into ordinary components; it belongs to full-height sections."
+    - "Do not wrap a full-height section in .container - it already handles its own gutters."
+    - "Do not hardcode a pixel width for text; cap the measure with max-w-* instead."
+    - "Do not assume rounded-2xl or rounded-full follow --radius. They do not."

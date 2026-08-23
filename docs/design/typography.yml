@@ -1,0 +1,338 @@
+# =============================================================================
+# TyPhed Landing Page - Typography System (source of truth for type work)
+# =============================================================================
+#
+# READ THIS FIRST. Reference this file before changing ANY font, size, weight,
+# letter-spacing, line-height, or heading level on the website. It documents
+# the two loaded typefaces, how they reach the browser, the roles each one
+# plays, the exact scale in use, and the heading semantics that must not drift.
+#
+# Sibling references: docs/design/spacing.yml (scale, gutters, rhythm) and
+# docs/design/colors.yml (text color tokens - this file never repeats a hex).
+#
+# -----------------------------------------------------------------------------
+# HOW TYPE WORKS (architecture)
+# -----------------------------------------------------------------------------
+# Two families are loaded, both through next/font/google in the app layout, and
+# both exposed to CSS as variables rather than as font-family declarations:
+#
+#     apps/web/app/layout.tsx
+#       Inter         -> --font-inter          -> font-sans     (body)
+#       Space Grotesk -> --font-space-grotesk  -> font-display  (brand voice)
+#
+#   1) The variables are attached to <html> via the className, so they are in
+#      scope for the whole tree including portals.
+#   2) shared/components/packages/config-tailwind/tailwind.config.js maps them under
+#      theme.extend.fontFamily, each with a real system fallback stack.
+#   3) <body> carries `font-sans`, so Inter is the default and `font-display`
+#      is an explicit opt-in per element.
+#
+#   next/font downloads and SELF-HOSTS both families at build time. Nothing is
+#   fetched from Google at runtime, which is what makes this work in a static
+#   export with no server, and it ships size-adjusted fallback metrics so the
+#   swap does not shift layout.
+#
+#   The app owns font loading. packages/ui never imports a font - shared
+#   components only ever use the `font-sans` / `font-display` utility classes,
+#   which is what keeps the package reusable by a future site with its own type.
+#
+# -----------------------------------------------------------------------------
+# NO CUSTOM TYPE SCALE
+# -----------------------------------------------------------------------------
+# The preset extends fontFamily only. Every text-* utility is stock Tailwind on
+# a 16px root. The two page headlines are the sole exception: they use fluid
+# clamp() values, described under `fluid_headings` below.
+# =============================================================================
+
+meta:
+  project: "TyPhed - Engineering Tomorrow"
+  owner: "Debmalya Pramanik HUF"
+  source_of_truth: "apps/web/app/layout.tsx (loading) + shared/components/packages/config-tailwind/tailwind.config.js (mapping)"
+  body_font: "Inter"
+  display_font: "Space Grotesk"
+  root_font_size: "16px"
+  custom_type_scale: "none - theme.extend defines no fontSize, lineHeight, or letterSpacing key"
+  default_family: "font-sans, applied on <body> in layout.tsx"
+
+# =============================================================================
+# FAMILIES
+# =============================================================================
+families:
+
+  sans:
+    name: "Inter"
+    utility: "font-sans"
+    css_variable: "--font-inter"
+    stack: "var(--font-inter), ui-sans-serif, system-ui, sans-serif"
+    loaded_by: "next/font/google in apps/web/app/layout.tsx"
+    options:
+      subsets: ["latin"]
+      display: "swap"
+      variable: "--font-inter"
+    role: >
+      Everything that is read rather than looked at: body copy, navigation,
+      footer links and headings, buttons, labels, captions, legal lines.
+
+  display:
+    name: "Space Grotesk"
+    utility: "font-display"
+    css_variable: "--font-space-grotesk"
+    stack: "var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif"
+    loaded_by: "next/font/google in apps/web/app/layout.tsx"
+    options:
+      subsets: ["latin"]
+      display: "swap"
+      variable: "--font-space-grotesk"
+    role: >
+      The brand voice, used sparingly and always at a large size or as a
+      numeral. The call sites below are the complete list.
+    call_sites:
+      - "wip-landing.tsx      - the h1 ('Engineering' / 'Tomorrow')"
+      - "about/page.tsx       - the h1 ('About' / 'TyPhed')"
+      - "brand-mark.tsx       - the 'TyPhed' wordmark in the header"
+      - "countdown-timer.tsx  - the countdown digits, the ':' separators, and the 'We are live.' state"
+    not_used_by: >
+      CardTitle (shared/components/packages/ui/components/ui/card.tsx) is text-2xl font-semibold
+      and inherits font-sans. It looks like a display heading and is not one.
+      Noted here so nobody assumes the primitive carries the brand face.
+
+  mono:
+    utility: "font-mono"
+    stack: "ui-monospace, SFMono-Regular, Menlo, monospace"
+    loaded_by: "nothing - system stack only, no webfont is downloaded"
+    status: "declared in the preset, unused on the site today"
+    role: "Reserved for code, keys, and identifiers if the product site ever needs them."
+
+  fallback_policy: >
+    Every family ends in a real system stack, so a blocked or failed font
+    request degrades to a readable face instead of a serif default. Keep that
+    property when adding a family.
+
+# =============================================================================
+# TYPE SCALE  (stock Tailwind - size / line-height, as actually used)
+# =============================================================================
+scale:
+
+  "text-[0.625rem]":
+    size: "10px"
+    where: "countdown unit labels on mobile (Days / Hours / Minutes / Seconds)"
+    note: "The smallest type on the site. Only ever used uppercase and letter-spaced as a label - never for prose."
+
+  text-xs:
+    size: "12px / 16px"
+    where: "footer bottom bar, launch progress label and captions, sm: step-up for the countdown unit labels"
+
+  text-sm:
+    size: "14px / 20px"
+    where: "header nav links, mobile menu links, all footer links and column headings, Button label, CardDescription, the 'Target Launch Date' line"
+
+  text-base:
+    size: "16px / 24px"
+    where: "hero and about paragraph at mobile size"
+
+  text-lg:
+    size: "18px / 28px"
+    where: "sm: step-up for the hero and about paragraph"
+
+  text-xl:
+    size: "20px / 28px"
+    where: "the 'TyPhed' wordmark in BrandMark"
+
+  text-2xl:
+    size: "24px / 32px"
+    where: "CardTitle; the ':' separator between countdown tiles at mobile size"
+
+  text-3xl:
+    size: "30px / 36px"
+    where: "countdown digits at mobile size; the 'We are live.' headline"
+
+  text-4xl:
+    size: "36px / 40px"
+    where: "sm: step-up for 'We are live.' and for the ':' separator"
+
+  text-5xl:
+    size: "48px / 1"
+    where: "sm: step-up for the countdown digits"
+
+fluid_headings:
+  why: >
+    The page headlines live inside min-h-dvh snap sections that must fit one
+    viewport. A fixed text-6xl overflows a short laptop window and pushes the
+    countdown out of view, so both h1s scale with the viewport instead.
+  home:
+    file: "shared/components/packages/ui/components/wip-landing.tsx"
+    class: "text-[clamp(2.25rem,8vmin,4.5rem)]"
+    range: "36px -> 72px"
+  about:
+    file: "apps/web/app/about/page.tsx"
+    class: "text-[clamp(2rem,7vmin,4rem)]"
+    range: "32px -> 64px"
+  vmin_not_vw: >
+    The middle term is vmin (the smaller viewport axis), not vw. On a short,
+    wide window vw would inflate the headline until it crowded everything
+    below it; vmin keeps the headline proportional to the space that is
+    actually scarce.
+
+# =============================================================================
+# WEIGHTS
+# =============================================================================
+weights:
+  "300 (font-light)": "the ':' separator between countdown tiles - deliberately recessive"
+  "400 (default)": "all body copy, nav links, footer links, captions"
+  "500 (font-medium)": "header nav links, Button label, the launch date value, the progress percentage"
+  "600 (font-semibold)": "both h1s, the TyPhed wordmark, countdown digits, footer column headings, CardTitle"
+  "700 (font-bold)": "the OG share card only - a raster image, not the live page (see og_card)"
+  rule: >
+    Nothing on the live site is bolder than 600. The hierarchy is carried by
+    size, family, and color, not by weight. Keep it that way; a 700 heading
+    reads as a different brand.
+
+# =============================================================================
+# LETTER-SPACING AND LINE-HEIGHT
+# =============================================================================
+tracking:
+  tracking-tight:
+    value: "-0.025em"
+    where: "both h1s, the TyPhed wordmark, CardTitle"
+    why: "Large display type needs negative tracking to stop the letterforms drifting apart."
+  "tracking-[0.2em]":
+    where: "countdown unit labels"
+  "tracking-[0.18em]":
+    where: "the 'Launch progress' label"
+  why_wide: >
+    Both wide-tracked strings are tiny, uppercase, and non-prose. Wide tracking
+    is what makes 10-12px uppercase legible; never apply it to a sentence.
+
+leading:
+  "leading-[1.05]": "both h1s - tight enough that the two stacked lines read as one block"
+  leading-none: "CardTitle"
+  default: "everything else inherits Tailwind's per-size line-height, listed in the scale above"
+
+# =============================================================================
+# CASING, NUMERALS, AND TEXT BEHAVIOUR
+# =============================================================================
+treatments:
+
+  uppercase:
+    css_driven:
+      - "countdown unit labels        - uppercase utility, countdown-timer.tsx"
+      - "the 'Launch progress' label  - uppercase utility, launch-progress.tsx"
+    data_driven:
+      - "footer column headings ('PRODUCTS', 'RESOURCES') are stored uppercase in shared/documents/brand/navigation.json"
+    gotcha: >
+      The footer headings carry NO uppercase utility. Searching the components
+      for `uppercase` will not find them. To change their casing, edit
+      footer.products.heading / footer.resources.heading in navigation.json,
+      not the footer markup.
+
+  tabular_nums:
+    where:
+      - "countdown digits"
+      - "the launch progress percentage"
+      - "the 'N days to launch' caption"
+    why: >
+      These numbers change while the visitor watches. Proportional digits make
+      the text jitter horizontally on every tick; tabular-nums fixes the advance
+      width. Any new live number needs it too.
+
+  text_balance:
+    where: "the hero paragraph and the about paragraph"
+    why: "Evens the ragged edge of a short centered paragraph instead of leaving one orphan word on line two."
+
+  alignment:
+    text-center: "the full-height sections (hero, about) - the whole section is centered"
+    text-right: "the 'N days to launch' caption, so it aligns to the end of the progress track"
+    default: "left, everywhere else"
+
+  gradient_text:
+    where:
+      - "'Tomorrow' in the hero h1"
+      - "'TyPhed' split across two spans in the about h1"
+    technique: "bg-gradient-to-r from-brand via-brand to-brand-2 + bg-clip-text + text-transparent"
+    caution: >
+      text-transparent means the word is invisible if the gradient background
+      fails to paint. Keep the gradient classes and text-transparent on the SAME
+      span, and never apply text-transparent alone.
+    colors: "see docs/design/colors.yml -> usage.brand_gradient_onpage"
+
+  rendering:
+    file: "apps/web/app/globals.css"
+    antialiased: "applied on <body> (-webkit-font-smoothing: antialiased)"
+    text_rendering: "optimizeLegibility"
+    text_size_adjust: "-webkit-text-size-adjust: 100% on <html> - prevents mobile Safari inflating text on rotate"
+    selection: "::selection uses bg-brand/25 with text-foreground"
+
+# =============================================================================
+# HEADING SEMANTICS  (the document outline, not the styling)
+# =============================================================================
+headings:
+  rule: "Exactly one h1 per page. Heading levels never skip."
+  current_outline:
+    home:
+      h1: "'Engineering / Tomorrow' - wip-landing.tsx, prefixed by an sr-only 'TyPhed - ' so the accessible name carries the brand"
+      h2: "footer column headings (PRODUCTS, RESOURCES, Contact Us)"
+      h3: "'Social Connect', nested under the Contact Us h2"
+    about:
+      h1: "'About / TyPhed' - apps/web/app/about/page.tsx"
+      h2: "same footer headings"
+      h3: "same"
+  notes:
+    - "The footer's h2s belong to every page. A new page section must not open at h2 in a way that competes with them for meaning - use the section's own h2 and keep the footer last in the DOM, as it is."
+    - "The countdown, the progress bar, and the launch-date line are paragraphs and labels, not headings. Do not promote them for visual weight; set the size instead."
+    - "Styling is independent of level. The footer h2s are text-sm; size never implies the heading level."
+  accessible_names:
+    - "BrandMark: the wordmark is real text; the mark <img> carries an alt of '<SITE.name> logo'."
+    - "BrandLockup: both theme images are aria-hidden, and one sr-only span carries the name, so the accessible name is stable across themes."
+    - "sr-only is the only permitted way to hide text from sight while keeping it for assistive tech. Never use display:none for that."
+
+# =============================================================================
+# STATIC / RASTER TYPE  (baked at build time, cannot read the theme)
+# =============================================================================
+og_card:
+  file: "apps/web/app/opengraph-image.tsx"
+  size: "1200 x 630"
+  font_family: "'sans-serif' - the ImageResponse system fallback. Space Grotesk is NOT used here."
+  type:
+    eyebrow: "22px, uppercase, letterSpacing 0.22em ('Work in progress')"
+    logo_chip: "32px, weight 700 (the 'T' glyph)"
+    wordmark: "128px, weight 700, letterSpacing -0.03em ('Ty' + 'Phed')"
+    tagline: "56px ('Engineering Tomorrow'), 8px below the wordmark"
+    footer_row: "26px (legal entity, and 'Launching <LAUNCH_LABEL>')"
+  known_drift: >
+    The card approximates the site's type with a system sans and a heavier
+    weight than the live page allows. That is a deliberate trade for a
+    build-time raster. If you restyle the site's type, update this file by hand
+    or the share card will look like a different brand.
+  brand_artwork: >
+    The mark, lockup, and favicon SVGs under shared/documents/assets/brand/ carry their
+    own baked lettering. A change to the display font means re-exporting that
+    artwork, not editing CSS.
+
+# =============================================================================
+# HOW TO CHANGE TYPOGRAPHY  (do this, not that)
+# =============================================================================
+change_guide:
+  to_restyle_existing_text:
+    - "Use the utility classes: text-sm / font-medium / tracking-tight. Never write a font-size or font-family in a component."
+    - "Pick from the scale above. A size that is not in the scale needs a reason recorded here."
+    - "Color comes from a token (text-foreground, text-muted-foreground). See docs/design/colors.yml."
+  to_add_a_font:
+    - "1. Import it from next/font/google in apps/web/app/layout.tsx with subsets and display: 'swap'."
+    - "2. Give it a `variable` (--font-<name>) and add that variable to the <html> className."
+    - "3. Map it under theme.extend.fontFamily in shared/components/packages/config-tailwind/tailwind.config.js, ending with a system fallback stack."
+    - "4. Only then use font-<name> in components."
+    - "Do not add the import to packages/ui - the app owns font loading, the package owns usage."
+  to_change_the_display_font:
+    - "Update the next/font import and the preset mapping together."
+    - "Re-export the brand artwork under shared/documents/assets/brand/ (mark, lockup, favicons) - the lettering is baked in."
+    - "Update apps/web/app/opengraph-image.tsx by hand."
+    - "Re-check both h1 clamps: a wider face at clamp ceiling can wrap to three lines and break the one-viewport section."
+  to_add_a_page_headline:
+    - "Use the fluid clamp() pattern with vmin, not a fixed text-* size, inside any min-h-dvh section."
+    - "Pair it with font-display, font-semibold, leading-[1.05], and tracking-tight to match the existing two."
+  do_not:
+    - "Do not exceed font-semibold (600) on the live site."
+    - "Do not use the 10px label size for prose."
+    - "Do not apply wide tracking to sentences - it is for uppercase micro-labels only."
+    - "Do not drop tabular-nums from a number that updates on a timer."
+    - "Do not skip a heading level to get a smaller size; set the size with a utility."

@@ -1,0 +1,6 @@
+{
+  "_comment": "UTC instants with the IST (UTC+05:30) offset already applied. 2027-03-31T18:30:00Z is 01 April 2027 00:00 IST. Keep this convention so the countdown reads correctly from any timezone.",
+  "date": "2027-03-31T18:30:00.000Z",
+  "startDate": "2026-04-30T18:30:00.000Z",
+  "label": "01 April 2027, 00:00 IST"
+}

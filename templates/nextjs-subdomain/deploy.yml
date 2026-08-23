@@ -1,0 +1,83 @@
+# Copy to .github/workflows/deploy.yml and adjust the app filter and the
+# permalink step if the property does not have one.
+#
+# The step that matters for the shared layer is "Follow the shared branches".
+# actions/checkout restores each submodule at the commit this repository has
+# recorded, which goes stale the moment a shared repository moves. The --remote
+# update fast-forwards both submodules to their branch tip, so every release
+# build compiles the newest shared code with no pointer bump anywhere.
+
+name: Deploy Site to GitHub Pages
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Static Export
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      # actions/checkout clones submodules shallow, so the branch ref has to be
+      # fetched before --remote has anything to fast-forward to.
+      - name: Follow the shared branches
+        run: |
+          git submodule foreach git fetch --tags origin
+          git submodule update --remote --merge
+          git submodule status
+
+      - name: Setup Package Manager (pnpm)
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # Not --frozen-lockfile: floating the submodules can introduce a
+      # dependency this lockfile has never seen, and a frozen install fails on
+      # exactly that. Reproducibility is traded for propagation on purpose; see
+      # MIGRATION.md in shared.documents.
+      - name: Install Dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+        run: pnpm --filter web build
+
+      - name: Configure GH Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/out
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy Artifacts
+        id: deployment
+        uses: actions/deploy-pages@v4

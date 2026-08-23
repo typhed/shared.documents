@@ -1,0 +1,102 @@
+/**
+ * `@typhed/brand` - the single source of truth for brand copy, the launch
+ * schedule, navigation, and contact links across every TyPhed property.
+ *
+ * The values live in the JSON files beside this one so that a non-React
+ * subdomain can read them directly. This module is the typed view of that
+ * data, and it keeps the export names the component library has always used,
+ * so consuming code does not care where the values came from.
+ *
+ * Edit the JSON, never this file, to change what the site says.
+ */
+
+import launchData from "./launch.json"
+import navigationData from "./navigation.json"
+import siteData from "./site.json"
+import type { Copyright, FooterColumn, NavLink, Site, SocialLink } from "./types"
+
+export type {
+  ColorTokens,
+  Copyright,
+  FooterColumn,
+  NavLink,
+  Site,
+  SocialLink,
+  ThemeTokens,
+} from "./types"
+
+/** Brand identity: name, tagline, legal entity, canonical URL, description. */
+export const SITE: Site = siteData
+
+/**
+ * Launch target, expressed in UTC with the IST offset already applied so the
+ * countdown reads correctly from every timezone. See `launch.json`.
+ */
+export const LAUNCH_DATE = new Date(launchData.date)
+
+/** Start of the journey, used as the 0% point of the launch progress bar. */
+export const LAUNCH_START_DATE = new Date(launchData.startDate)
+
+/** Human-readable launch instant, shown beside the countdown. */
+export const LAUNCH_LABEL: string = launchData.label
+
+/**
+ * Ownership lines for the footer's bottom bar. The year is stamped at module
+ * load from `line1Template`, so no annual maintenance is needed.
+ */
+export const COPYRIGHT: Copyright = {
+  line1: navigationData.copyright.line1Template.replace("{year}", String(new Date().getFullYear())),
+  line2: navigationData.copyright.line2,
+}
+
+/**
+ * Social and contact links shown as the footer's icon row. To add a network,
+ * append an entry to `navigation.json` with one of the supported `icon` names
+ * in `types.ts` - no component change is needed. (The `mail` entry is the
+ * contact address; the footer renders it as a text link, not an icon, to
+ * avoid duplication.)
+ */
+export const SOCIAL_LINKS: readonly SocialLink[] = navigationData.social as readonly SocialLink[]
+
+/** Contact address surfaced in the footer (no phone / postal address yet). */
+export const CONTACT_EMAIL: string = navigationData.contactEmail
+
+/** Primary header navigation. */
+export const NAV_LINKS: readonly NavLink[] = navigationData.nav
+
+/**
+ * The header's primary call-to-action, shared by the desktop bar and the
+ * mobile menu so the label and destination stay in one place.
+ */
+export const LOGIN_CTA: NavLink = navigationData.loginCta
+
+/**
+ * The products the brand layer points visitors at. Each live product sits on
+ * its own subdomain, so those entries are external; pricing is a page on the
+ * brand site and stays a placeholder until it exists.
+ */
+export const PRODUCT_LINKS: readonly NavLink[] = navigationData.footer.products.links
+
+/**
+ * Reading, evidence, and hiring. The blog runs on its own subdomain and the
+ * career page is the LinkedIn company page, so both leave the site.
+ */
+export const RESOURCE_LINKS: readonly NavLink[] = navigationData.footer.resources.links
+
+/**
+ * The two middle footer columns. The brand column (the lockup alone) and the
+ * Contact column are rendered separately, as they hold non-list content.
+ */
+export const FOOTER_COLUMNS: readonly FooterColumn[] = [
+  {
+    heading: navigationData.footer.products.heading,
+    links: PRODUCT_LINKS,
+  },
+  {
+    heading: navigationData.footer.resources.heading,
+    links: RESOURCE_LINKS,
+  },
+]
+
+/** Legal link shown on the right of the footer's bottom bar. */
+export const PRIVACY_LINK: NavLink = navigationData.privacy

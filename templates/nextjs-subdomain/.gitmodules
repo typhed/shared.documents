@@ -1,0 +1,13 @@
+# Copy into the repository root. The `branch` key is what lets
+# `git submodule update --remote` fast-forward to the branch tip; without it,
+# --remote has nothing to follow and shared changes never propagate.
+
+[submodule "shared/documents"]
+	path = shared/documents
+	url = https://github.com/typhed/shared.documents.git
+	branch = master
+
+[submodule "shared/components"]
+	path = shared/components
+	url = https://github.com/typhed/shared.components.git
+	branch = master

@@ -1,0 +1,485 @@
+# =============================================================================
+# TyPhed Landing Page - Color System (single source of truth for color work)
+# =============================================================================
+#
+# READ THIS FIRST. Reference this file before making ANY color change anywhere
+# on the website. It documents every color used on the landing page, the two
+# themes, how light/dark are wired, the exact HEX codes, and the gotchas that
+# will bite you if you change one place without changing its mirror.
+#
+# Hex codes are written in UPPERCASE (e.g. #ABC123, never #abc123).
+#
+# -----------------------------------------------------------------------------
+# HOW THEMING WORKS (architecture)
+# -----------------------------------------------------------------------------
+# There are TWO parallel color systems. Keep them in sync by hand.
+#
+#  1) RUNTIME THEME TOKENS  (everything rendered by React + Tailwind)
+#     - Defined as HSL triplets in the brand contract:
+#         shared/documents/brand/tokens/colors.json  ->  themes.light / themes.dark
+#     - Emitted as CSS custom properties on :root (light) and .dark (dark)
+#       by the shared Tailwind preset, so no app declares the palette itself
+#     - The HSL triplet is the SOURCE OF TRUTH. Values are stored WITHOUT the
+#       hsl() wrapper, e.g.  --brand: 188 86% 53%
+#     - Mapped to Tailwind color utilities in:
+#         shared/components/packages/config-tailwind/tailwind.config.js
+#       via  "hsl(var(--token))"  so classes like bg-brand / text-foreground
+#       resolve to the active theme automatically.
+#     - Apps consume the preset:
+#         apps/web/tailwind.config.ts  ->  presets: [@typhed/tailwind-config]
+#     - The HEX values listed in this file are the COMPUTED (browser-rendered)
+#       result of each HSL token. They are for reference/eyedropper work only.
+#       To CHANGE a token, edit the HSL in colors.json - do not paste hex there.
+#
+#  2) STATIC / RASTER ASSET COLORS  (hardcoded hex, NOT theme-aware)
+#     - These are baked at build time and cannot read CSS variables, so they
+#       carry their own literal hex codes that only APPROXIMATE the dark theme:
+#         apps/web/app/opengraph-image.tsx  (1200x630 social card)
+#         apps/web/app/manifest.ts          (PWA background_color / theme_color)
+#         apps/web/app/layout.tsx           (viewport.themeColor + tile meta)
+#         shared/documents/assets/brand/            (mark, lockup, favicon artwork)
+#     - IMPORTANT: these do NOT equal the HSL token hexes exactly. They use the
+#       clean Tailwind palette hexes (#22D3EE, #6366F1) and a dedicated brand
+#       navy (#0B1020) that is distinct from the dark --background (#080C1C).
+#       If you restyle the brand, update BOTH systems or the favicon/OG card
+#       will drift from the live site.
+#
+# -----------------------------------------------------------------------------
+# DEFAULT THEME
+# -----------------------------------------------------------------------------
+#   Dark ("Midnight Indigo") is the DEFAULT.
+#     apps/web/app/layout.tsx -> <ThemeProvider defaultTheme="dark" enableSystem>
+#   next-themes applies the `.dark` class on <html>. enableSystem means a
+#   first-time visitor with an OS light preference can resolve to light; the
+#   in-app toggle (theme-toggle.tsx) then flips between light/dark explicitly.
+#   The two themes deliberately SWAP the accent hue:
+#     - Light: primary/brand = INDIGO, secondary accent = CYAN
+#     - Dark : primary/brand = CYAN,   secondary accent = INDIGO/VIOLET
+# =============================================================================
+
+meta:
+  project: "TyPhed - Engineering Tomorrow"
+  owner: "Debmalya Pramanik HUF"
+  source_of_truth: "shared/documents/brand/tokens/colors.json"
+  token_format: "HSL triplet without hsl() wrapper, e.g. '188 86% 53%'"
+  hex_case: "UPPERCASE"
+  default_theme: "dark"
+  light_theme_name: "Aurora Glass"
+  dark_theme_name: "Midnight Indigo"
+  font_display: "Space Grotesk (var --font-space-grotesk)"
+  font_sans: "Inter (var --font-inter)"
+
+# =============================================================================
+# THEME TOKENS
+# Each entry:  hsl (source of truth) | hex (computed, rendered) | tailwind class
+#              | role/usage notes
+# =============================================================================
+themes:
+
+  # ---------------------------------------------------------------------------
+  # LIGHT THEME - "Aurora Glass"  (colors.json themes.light -> :root)
+  # Cool near-white surfaces, slate ink, INDIGO as the primary/brand accent,
+  # CYAN as the secondary brand accent.
+  # ---------------------------------------------------------------------------
+  light:
+    background:
+      hsl: "210 40% 98%"
+      hex: "#F8FAFC"          # slate-50; also the light viewport themeColor
+      class: "bg-background"
+      usage: "Page canvas behind everything; AbstractBackground base."
+    foreground:
+      hsl: "222 47% 11%"
+      hex: "#0F1729"          # ~slate-900 (nominal #0F172A)
+      class: "text-foreground"
+      usage: "Primary body + heading ink. 'Engineering' word, digits, labels."
+    card:
+      hsl: "0 0% 100%"
+      hex: "#FFFFFF"
+      class: "bg-card"
+      usage: "Card/surface fill. Countdown tiles use bg-card/40 (40% alpha)."
+    card_foreground:
+      hsl: "222 47% 11%"
+      hex: "#0F1729"
+      class: "text-card-foreground"
+    popover:
+      hsl: "0 0% 100%"
+      hex: "#FFFFFF"
+      class: "bg-popover"
+    popover_foreground:
+      hsl: "222 47% 11%"
+      hex: "#0F1729"
+    primary:
+      hsl: "239 84% 67%"
+      hex: "#6467F2"          # nominal Tailwind indigo-500 #6366F1
+      class: "bg-primary / text-primary"
+      usage: "Buttons (theme toggle), links. In light theme primary == brand."
+    primary_foreground:
+      hsl: "0 0% 100%"
+      hex: "#FFFFFF"
+      class: "text-primary-foreground"
+      usage: "Text/icon on primary fills."
+    secondary:
+      hsl: "220 14% 96%"
+      hex: "#F3F4F6"          # gray-100
+      class: "bg-secondary"
+      usage: "Muted fills; launch progress track uses bg-secondary/60."
+    secondary_foreground:
+      hsl: "222 47% 11%"
+      hex: "#0F1729"
+      class: "text-secondary-foreground"
+    muted:
+      hsl: "220 14% 96%"
+      hex: "#F3F4F6"          # gray-100
+      class: "bg-muted"
+    muted_foreground:
+      hsl: "215 16% 47%"
+      hex: "#65758B"          # ~slate-500 (nominal #64748B)
+      class: "text-muted-foreground"
+      usage: "Secondary copy: tagline, unit labels, footer text, % counters."
+    accent:
+      hsl: "220 14% 96%"
+      hex: "#F3F4F6"          # gray-100
+      class: "bg-accent"
+      usage: "Hover fill for ghost/outline buttons."
+    accent_foreground:
+      hsl: "222 47% 11%"
+      hex: "#0F1729"
+      class: "text-accent-foreground"
+    destructive:
+      hsl: "0 72% 51%"
+      hex: "#DC2828"          # ~red-600 (nominal #DC2626)
+      class: "bg-destructive"
+      usage: "Error/danger state on Button destructive variant (unused on LP)."
+    destructive_foreground:
+      hsl: "210 40% 98%"
+      hex: "#F8FAFC"
+      class: "text-destructive-foreground"
+    border:
+      hsl: "220 13% 91%"
+      hex: "#E5E7EB"          # gray-200
+      class: "border-border"
+      usage: "Default border; also the masked grid lines in AbstractBackground."
+    input:
+      hsl: "220 13% 91%"
+      hex: "#E5E7EB"
+      class: "border-input"
+    ring:
+      hsl: "239 84% 67%"
+      hex: "#6467F2"
+      class: "ring-ring"
+      usage: "Focus-visible outline (keyboard a11y). Mirrors primary/brand."
+    brand:
+      hsl: "239 84% 67%"
+      hex: "#6467F2"          # nominal indigo-500 #6366F1
+      class: "bg-brand / text-brand / from-brand"
+      usage: "Primary brand accent. 'Phed' wordmark, glyph gradient start, orbs."
+    brand_foreground:
+      hsl: "0 0% 100%"
+      hex: "#FFFFFF"
+      class: "text-brand-foreground"
+    brand_2:
+      hsl: "188 86% 47%"
+      hex: "#11C3DF"          # custom cyan (between cyan-400/500)
+      class: "bg-brand-2 / to-brand-2"
+      usage: "Secondary brand accent / gradient end. 'Tomorrow', glyph, orb."
+
+  # ---------------------------------------------------------------------------
+  # DARK THEME - "Midnight Indigo"  (colors.json themes.dark -> .dark)  *** DEFAULT ***
+  # Deep indigo-navy surfaces, soft slate text, CYAN as primary/brand,
+  # VIOLET as the secondary brand accent (the hues swap vs light).
+  # ---------------------------------------------------------------------------
+  dark:
+    background:
+      hsl: "226 57% 7%"
+      hex: "#080C1C"          # near-black indigo navy (NOTE: != #0B1020, see static_assets)
+      class: "bg-background"
+      usage: "Page canvas; AbstractBackground base + outer vignette stop."
+    foreground:
+      hsl: "213 31% 91%"
+      hex: "#E1E7EF"          # ~slate-200
+      class: "text-foreground"
+      usage: "Primary text/headings. 'Engineering', digits, emphasized copy."
+    card:
+      hsl: "224 47% 12%"
+      hex: "#10182D"
+      class: "bg-card"
+      usage: "Glass tiles (bg-card/40 + backdrop-blur) in the countdown."
+    card_foreground:
+      hsl: "213 31% 91%"
+      hex: "#E1E7EF"
+      class: "text-card-foreground"
+    popover:
+      hsl: "224 47% 10%"
+      hex: "#0E1425"
+      class: "bg-popover"
+    popover_foreground:
+      hsl: "213 31% 91%"
+      hex: "#E1E7EF"
+    primary:
+      hsl: "188 86% 53%"
+      hex: "#20D3EE"          # nominal Tailwind cyan-400 #22D3EE
+      class: "bg-primary / text-primary"
+      usage: "Theme-toggle button fill, links. In dark theme primary == brand."
+    primary_foreground:
+      hsl: "226 57% 7%"
+      hex: "#080C1C"
+      class: "text-primary-foreground"
+      usage: "Dark ink on the bright cyan button (high contrast)."
+    secondary:
+      hsl: "224 40% 18%"
+      hex: "#1C2540"
+      class: "bg-secondary"
+      usage: "Muted surface; progress track bg-secondary/60."
+    secondary_foreground:
+      hsl: "213 31% 91%"
+      hex: "#E1E7EF"
+      class: "text-secondary-foreground"
+    muted:
+      hsl: "224 35% 16%"
+      hex: "#1B2237"
+      class: "bg-muted"
+    muted_foreground:
+      hsl: "217 18% 65%"
+      hex: "#96A2B6"          # ~slate-400
+      class: "text-muted-foreground"
+      usage: "Tagline, unit labels, footer, social icons (resting), counters."
+    accent:
+      hsl: "224 40% 18%"
+      hex: "#1C2540"
+      class: "bg-accent"
+    accent_foreground:
+      hsl: "213 31% 91%"
+      hex: "#E1E7EF"
+      class: "text-accent-foreground"
+    destructive:
+      hsl: "0 62% 45%"
+      hex: "#BA2C2C"
+      class: "bg-destructive"
+      usage: "Danger variant (unused on the landing page)."
+    destructive_foreground:
+      hsl: "210 40% 98%"
+      hex: "#F8FAFC"
+      class: "text-destructive-foreground"
+    border:
+      hsl: "224 33% 20%"
+      hex: "#222B44"
+      class: "border-border"
+      usage: "Tile/footer borders (often /40-/60 alpha) and the masked grid."
+    input:
+      hsl: "224 33% 20%"
+      hex: "#222B44"
+      class: "border-input"
+    ring:
+      hsl: "188 86% 53%"
+      hex: "#20D3EE"
+      class: "ring-ring"
+      usage: "Focus ring; mirrors primary/brand cyan."
+    brand:
+      hsl: "188 86% 53%"
+      hex: "#20D3EE"          # nominal cyan-400 #22D3EE
+      class: "bg-brand / text-brand / from-brand"
+      usage: "Primary brand accent: 'Phed', gradient start, glow, orbs, divider."
+    brand_foreground:
+      hsl: "226 57% 7%"
+      hex: "#080C1C"
+      class: "text-brand-foreground"
+    brand_2:
+      hsl: "248 90% 70%"
+      hex: "#806EF7"          # violet/indigo
+      class: "bg-brand-2 / to-brand-2"
+      usage: "Secondary brand accent / gradient end: 'Tomorrow', glyph end, orb."
+
+# =============================================================================
+# STATIC / RASTER ASSET COLORS  (hardcoded hex - NOT theme-aware)
+# These are frozen at build time. They approximate the DARK theme but use the
+# clean Tailwind palette + a dedicated brand navy. Update by hand when rebrand.
+# =============================================================================
+static_assets:
+
+  brand_gradient_hardcoded:
+    # The canonical 2-stop brand gradient used in every raster/SVG asset.
+    from: "#22D3EE"           # cyan  (Tailwind cyan-400) == dark brand, nominal
+    to:   "#6366F1"           # indigo (Tailwind indigo-500) == light brand, nominal
+    direction: "linear-gradient(135deg, ...)"
+    used_in:
+      - "apps/web/app/opengraph-image.tsx (logo chip)"
+    note: >
+      These two hexes are the 'pure' brand colors. The live site renders the
+      HSL tokens instead (#20D3EE / #806EF7 in dark, #6467F2 / #11C3DF in
+      light), so the OG-card cyan is very slightly brighter than the on-page
+      cyan. Acceptable, but keep the family identical on rebrand. The shipped
+      logo artwork in apps/web/public/brand (mark, lockup, favicon) is the
+      master brand identity and bakes a richer multi-stop gradient in the same
+      cyan->indigo family; keep it in that family on any rebrand.
+
+  brand_navy:
+    hex: "#0B1020"
+    used_in:
+      - "apps/web/app/manifest.ts (background_color, theme_color)"
+      - "apps/web/app/layout.tsx (viewport.themeColor dark, msapplication-TileColor)"
+      - "apps/web/app/opengraph-image.tsx (canvas gradient start, logo ink)"
+    note: >
+      Dedicated 'brand navy'. NOTE it is NOT the dark --background token
+      (#080C1C). It is a hand-picked deeper-blue navy for browser chrome,
+      PWA splash, and social cards. Keep distinct unless intentionally unifying.
+
+  light_theme_color:
+    hex: "#F8FAFC"
+    used_in:
+      - "apps/web/app/layout.tsx (viewport.themeColor light)"
+    note: "Matches the light --background token exactly (slate-50)."
+
+  opengraph_card:
+    # apps/web/app/opengraph-image.tsx (1200x630 social share card)
+    canvas_gradient: "linear-gradient(135deg, #0B1020 0%, #0B1020 55%, #0E1733 100%)"
+    canvas_start: "#0B1020"   # brand navy
+    canvas_end: "#0E1733"     # slightly lifted indigo navy (gradient tail)
+    body_text: "#E2E8F0"      # slate-200
+    wordmark_ty: "#F8FAFC"    # slate-50
+    wordmark_phed: "#22D3EE"  # cyan accent
+    subtitle: "#CBD5E1"       # slate-300 ('Engineering Tomorrow')
+    muted_text: "#94A3B8"     # slate-400 (eyebrow + legal entity + footer)
+    dot_and_launch: "#22D3EE" # cyan status dot + 'Launching ...' text
+    logo_chip_ink: "#0B1020"  # 'T' inside the cyan->indigo chip
+
+# =============================================================================
+# USAGE PATTERNS, GRADIENTS & EFFECTS  (how colors combine on the page)
+# =============================================================================
+usage:
+
+  brand_gradient_onpage:
+    description: >
+      The signature on-page gradient runs brand -> brand -> brand-2 (the
+      doubled 'via-brand' weights the gradient toward the primary accent, so
+      the secondary hue only blooms at the tail).
+    classes: "bg-gradient-to-r from-brand via-brand to-brand-2"
+    appears_in:
+      - "'Tomorrow' headline (bg-clip-text text-transparent) - wip-landing.tsx"
+      - "Launch progress bar fill - launch-progress.tsx"
+    mark_and_lockup_assets:
+      description: >
+        The header/footer logo is the shipped artwork, not an inline SVG.
+        BrandMark renders /brand/mark/typhed-mark.svg; BrandLockup renders the
+        per-theme /brand/lockup files. Their gradients are baked into the assets
+        (see static_assets); only the BrandMark wordmark uses tokens.
+      files:
+        - "shared/components/packages/ui/components/brand-mark.tsx"
+        - "shared/components/packages/ui/components/brand-lockup.tsx"
+
+  abstract_background:
+    file: "shared/components/packages/ui/components/abstract-background.tsx"
+    layers:
+      top_glow: "radial-gradient ellipse at 50% -10% of hsl(var(--brand)/0.18) -> transparent"
+      masked_grid: "two linear-gradients of hsl(var(--border)) 1px lines, 64px cells, opacity 0.35, radial mask"
+      orb_1: "bg-brand/20, blur 120px (top-left, drift-slow)"
+      orb_2: "bg-brand-2/20, blur 130px (right, drift-slower)"
+      orb_3: "bg-brand/15, blur 120px (bottom-left, drift-slow)"
+      vignette: "radial-gradient transparent 42% -> hsl(var(--background)) 96%"
+    note: "All layers are token-driven, so the backdrop recolors with the theme."
+
+  glass_tiles:
+    file: "shared/components/packages/ui/components/countdown-timer.tsx"
+    fill: "bg-card/40 + backdrop-blur-xl"
+    border: "border-border/60"
+    shadow: "shadow-lg shadow-brand/5  (brand-tinted soft shadow at 5% alpha)"
+    top_highlight: "absolute h-px gradient: transparent -> via-brand/70 -> transparent"
+    sheen_overlay: "bg-gradient-to-b from-white/5 to-transparent (dark: from-white/[0.04])"
+    colon_separator: "text-brand/50 (the ':' between unit tiles)"
+
+  launch_progress:
+    file: "shared/components/packages/ui/components/launch-progress.tsx"
+    track: "bg-secondary/60 with border-border/50"
+    fill: "from-brand via-brand to-brand-2"
+    fill_glow: "shadow-[0_0_12px_hsl(var(--brand)/0.55)]  (brand bloom at 55% alpha)"
+
+  theme_toggle:
+    file: "shared/components/packages/ui/components/theme-toggle.tsx"
+    description: "A sliding switch with a dual-glyph track and animated knob."
+    track: "border-border, bg-secondary"
+    track_icons: "text-muted-foreground  (both Sun and Moon glyphs at rest)"
+    knob: "bg-primary, text-primary-foreground"
+    knob_animation: "translate-x-0 (light) or translate-x-6 (dark), transition-transform 200ms"
+    hover: "hover:border-brand/50"
+
+  header_backdrop:
+    file: "shared/components/packages/ui/components/site-header.tsx"
+    background: "bg-background/70 with backdrop-blur-md  (translucent blend so content reads behind)"
+    top_border: "border-border/40"
+    logo_link_focus: "focus-visible:ring-2 focus-visible:ring-ring"
+    nav_link_resting: "text-muted-foreground"
+    nav_link_hover: "hover:text-foreground"
+    mobile_menu_panel: "bg-background/95 with backdrop-blur-md, border-border/40"
+    mobile_link_hover: "hover:bg-accent hover:text-foreground"
+
+  scroll_to_top:
+    file: "shared/components/packages/ui/components/scroll-to-top.tsx"
+    description: "A back-to-top button fixed at the bottom-center viewport."
+    button_border_resting: "border-border"
+    button_background: "bg-background/70 with backdrop-blur-md  (translucent frosted glass)"
+    icon_resting: "text-muted-foreground"
+    button_border_hover: "hover:border-brand/50"
+    icon_hover: "hover:text-brand"
+    focus_ring: "ring-ring"
+
+  footer_surface:
+    file: "shared/components/packages/ui/components/site-footer.tsx"
+    description: "Footer grid, 20 / 30 / 30 / 20 on lg: brand column (BrandLockup alone), PRODUCTS and RESOURCES nav columns, and the contact column."
+    background: "bg-card with gradient-to-b from-brand/5 to-brand-2/5  (faint on-brand wash)"
+    top_border: "border-border"
+    bottom_bar_border: "border-border"
+    column_headings: "text-foreground  (nav columns, contact, social connect - the brand column has no heading)"
+    nav_link_resting: "text-muted-foreground"
+    nav_link_hover: "hover:text-brand"
+    external_link_arrow: "currentColor  (no token of its own; it inherits the link colour and hovers with the label)"
+    brand_lockup: "BrandLockup - per-theme baked artwork (mark + wordmark + 'Engineering Tomorrow' tagline); see brand-lockup.tsx"
+    secondary_text: "text-muted-foreground  (copyright, legal entity)"
+    social_icon_button_resting: "border-border, bg-background/40, text-muted-foreground"
+    social_icon_button_hover: "border-brand/50, text-brand"
+
+  text_selection:
+    file: "apps/web/app/globals.css (::selection)"
+    rule: "bg-brand/25 text-foreground  (highlight uses 25% brand tint)"
+
+  white_tints:
+    note: >
+      The only literal white used on-page is low-alpha sheen on glass tiles:
+      from-white/5 (light) and dark:from-white/[0.04] (dark). Everything else
+      routes through tokens. Avoid introducing raw white/black - use tokens.
+
+# =============================================================================
+# COLOR ROLE QUICK-MAP  (which accent is which, per theme)
+# =============================================================================
+role_map:
+  primary_accent:
+    light: "INDIGO  #6467F2  (brand == primary)"
+    dark:  "CYAN    #20D3EE  (brand == primary)"
+  secondary_accent:
+    light: "CYAN    #11C3DF  (brand-2)"
+    dark:  "VIOLET  #806EF7  (brand-2)"
+  note: "primary and brand share the same value in BOTH themes (ring too)."
+
+# =============================================================================
+# HOW TO CHANGE COLORS  (do this, not that)
+# =============================================================================
+change_guide:
+  to_recolor_the_theme:
+    - "Edit the HSL triplet in shared/documents/brand/tokens/colors.json (themes.light / themes.dark)."
+    - "Do NOT paste hex into colors.json - the tokens are HSL and Tailwind wraps them in hsl()."
+    - "One edit reaches every property: the shared preset emits the variables at build time."
+    - "Never hardcode a Tailwind color (e.g. text-cyan-400) in a component - use the token class (text-brand)."
+  to_add_a_new_token:
+    - "1. Add the token to BOTH themes.light.vars and themes.dark.vars in brand/tokens/colors.json."
+    - "2. Map it under theme.extend.colors in shared/components/packages/config-tailwind/tailwind.config.js as 'hsl(var(--token))'."
+    - "3. Then use bg-token / text-token etc. in components."
+  when_changing_brand_colors_also_update_static_assets:
+    - "apps/web/app/opengraph-image.tsx (all hardcoded hexes listed above)"
+    - "apps/web/app/manifest.ts         (#0B1020 background/theme color)"
+    - "apps/web/app/layout.tsx          (viewport.themeColor light #F8FAFC / dark #0B1020, tile color)"
+    - "shared/documents/assets/brand/           (mark, lockup, favicon artwork - master brand files)"
+    - "Reason: raster/SVG/meta colors can't read CSS vars; they drift silently."
+  alpha_convention:
+    - "Opacity is applied with the /NN suffix (e.g. bg-brand/20, border-border/60)."
+    - "Arbitrary alpha uses bracket syntax: dark:from-white/[0.04], hsl(var(--brand)/0.55)."
+  accessibility:
+    - "ring == brand in both themes; keep the focus ring visibly contrasting if recolored."
+    - "primary-foreground is intentionally dark (#080C1C) on the bright cyan dark button - preserve contrast."

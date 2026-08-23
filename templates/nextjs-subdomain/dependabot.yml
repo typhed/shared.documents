@@ -1,0 +1,26 @@
+# Copy to .github/dependabot.yml.
+#
+# CI already floats both submodules to their branch tip, so a shared change
+# reaches the built site without any pull request. This exists for the other
+# half of the problem: keeping the RECORDED submodule pointer current, so a
+# fresh local clone is not months behind what CI actually builds.
+#
+# It needs no secret and no token.
+
+version: 2
+updates:
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "\u2b06\ufe0f"
+    labels:
+      - "shared-layer"
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "\u2b06\ufe0f"

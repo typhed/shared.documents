@@ -1,0 +1,50 @@
+# DISABLED ON PURPOSE. Read before enabling.
+#
+# This belongs in a SHARED repository (shared.documents or shared.components),
+# not in a consumer. On every push to master it tells each consuming repository
+# to run its deploy workflow, so a shared change reaches production within
+# minutes instead of at the next Release.
+#
+# Two reasons it ships disabled:
+#
+#   1. It makes production deploys happen without publishing a Release. The
+#      brand site deliberately deploys only on a published Release, and turning
+#      this on removes that control from every property at once.
+#   2. It needs a personal access token with `repo` scope, stored as
+#      CONSUMER_DISPATCH_TOKEN in each shared repository, and rotated like any
+#      other credential.
+#
+# To enable: rename to .github/workflows/notify-consumers.yml, create the token,
+# list the consumer repositories below, and add this trigger to each consumer
+# deploy workflow:
+#
+#   on:
+#     repository_dispatch:
+#       types: [shared-layer-updated]
+
+name: Notify Consumers
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  dispatch:
+    name: Rebuild Consuming Properties
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repository:
+          - typhed/typhed.github.io
+          # - typhed/<blog repository>
+          # - typhed/<trading repository>
+    steps:
+      - name: Trigger deploy
+        run: |
+          curl -sSf -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $TOKEN" \
+            "https://api.github.com/repos/${{ matrix.repository }}/dispatches" \
+            -d '{"event_type":"shared-layer-updated"}'
+        env:
+          TOKEN: ${{ secrets.CONSUMER_DISPATCH_TOKEN }}
