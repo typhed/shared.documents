@@ -1,0 +1,21 @@
+{
+  "_comment": "The product catalogue. Written down once here so the brand site, each product subdomain and the account backend all agree on what exists, and mirrored into catalog.products_mw by migration so the database can hold foreign keys against it. Adding a product is a commit to this file plus a migration that re-runs the seed. isPaid says whether the product ever charges, not whether a given user is paying - registration and entitlement are separate questions and live in separate columns on catalog.user_products_mw.",
+  "products": [
+    {
+      "productId": "blog",
+      "name": "TyPhed BLOG",
+      "subdomain": "blog.typhed.com",
+      "isPaid": false,
+      "isActive": true,
+      "description": "Product notes, engineering write-ups and example documentation."
+    },
+    {
+      "productId": "trading",
+      "name": "TyPhed Trading",
+      "subdomain": "trading.typhed.com",
+      "isPaid": true,
+      "isActive": true,
+      "description": "One stop chart and analysis tool. Bring your own data, analyse, and disconnect."
+    }
+  ]
+}
