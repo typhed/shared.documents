@@ -83,6 +83,18 @@ Two things do **not** update themselves, and both are documented at the point of
   * The recorded submodule pointer in each consumer. CI ignores it, but a fresh local clone uses it. Dependabot raises
     the bump as a pull request so it does not drift far.
 
+### Writing A Link
+
+Links carry one extra rule, because the header and the footer render on every property. Write a page the brand layer
+hosts as the path it has on `typhed.com`, leading slash included. `brand/index.ts` expands it against `url` in
+[brand/site.json](brand/site.json) before a component ever sees it, so `/permalink/conduct.html` reaches the same page
+from `blog.typhed.com` as it does from the homepage. Write a destination that leaves the brand layer as a full URL with
+`"external": true`, which is what opens it in a new tab and marks it with a trailing arrow. Everything already
+unambiguous is left alone: a full URL, a `mailto:`, and the `#` placeholder that stands in until a page exists.
+
+The domain is never repeated inside a link. It is written once, as `url` in `site.json`, and every absolute link the
+contract hands out is built from it.
+
 ## ⚠️ Blast Radius
 
 A commit here changes every TyPhed property at once. Treat it accordingly:

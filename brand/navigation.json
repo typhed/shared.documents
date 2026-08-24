@@ -1,7 +1,8 @@
 {
+  "_comment": "An href that starts with / is a page the brand layer hosts, written as the path it has on typhed.com. brand/index.ts expands it against site.json's url before any component reads it, so the header and the footer reach the same page from a product subdomain. A destination outside the brand layer is written as a full URL and carries \"external\": true.",
   "nav": [
     { "label": "Our Products", "href": "#" },
-    { "label": "About Us", "href": "/about" }
+    { "label": "About Us", "href": "/about/" }
   ],
   "loginCta": { "label": "Login / Sign Up", "href": "#" },
   "footer": {

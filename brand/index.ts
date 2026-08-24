@@ -30,6 +30,47 @@ export type {
 export const SITE: Site = siteData
 
 /**
+ * The brand layer's own origin, with any trailing slash removed so a path
+ * appends cleanly. Every absolute link this module hands out is built from
+ * it, which keeps the domain written down exactly once, in `site.json`.
+ */
+const BRAND_ORIGIN = SITE.url.replace(/\/+$/, "")
+
+/**
+ * Expand one contract `href` into a destination that still works when the
+ * link is rendered on another property.
+ *
+ * The contract is written from the brand site's point of view, so a page
+ * `typhed.com` hosts is stored as the root-relative path it has there, such
+ * as `/about` or `/permalink/conduct.html`. That path is only correct while
+ * the page carrying it is also on `typhed.com`. Rendered by the shared header
+ * or footer on `blog.typhed.com`, the browser resolves it against the blog
+ * and lands on a page that was never deployed there. Expanding it against
+ * `BRAND_ORIGIN` points every property at the one page that exists.
+ *
+ * Anything already unambiguous is returned untouched: an absolute URL, a
+ * protocol-relative URL, a `mailto:`, and the `#` placeholder that stands in
+ * until a destination exists.
+ *
+ * Exported so a subdomain can build its own link to a brand page the same
+ * way, rather than writing the domain down a second time.
+ */
+export function resolveBrandHref(href: string): string {
+  const isBrandPath = href.startsWith("/") && !href.startsWith("//")
+  return isBrandPath ? `${BRAND_ORIGIN}${href}` : href
+}
+
+/** `resolveBrandHref` applied to one link, leaving the rest of it alone. */
+function resolveLink<T extends NavLink>(link: T): T {
+  return { ...link, href: resolveBrandHref(link.href) }
+}
+
+/** `resolveLink` mapped over a list of links, preserving their order. */
+function resolveLinks<T extends NavLink>(links: readonly T[]): readonly T[] {
+  return links.map(resolveLink)
+}
+
+/**
  * Launch target, expressed in UTC with the IST offset already applied so the
  * countdown reads correctly from every timezone. See `launch.json`.
  */
@@ -57,35 +98,39 @@ export const COPYRIGHT: Copyright = {
  * contact address; the footer renders it as a text link, not an icon, to
  * avoid duplication.)
  */
-export const SOCIAL_LINKS: readonly SocialLink[] = navigationData.social as readonly SocialLink[]
+export const SOCIAL_LINKS: readonly SocialLink[] = resolveLinks(
+  navigationData.social as readonly SocialLink[],
+)
 
 /** Contact address surfaced in the footer (no phone / postal address yet). */
 export const CONTACT_EMAIL: string = navigationData.contactEmail
 
 /** Primary header navigation. */
-export const NAV_LINKS: readonly NavLink[] = navigationData.nav
+export const NAV_LINKS: readonly NavLink[] = resolveLinks(navigationData.nav)
 
 /**
  * The header's primary call-to-action, shared by the desktop bar and the
  * mobile menu so the label and destination stay in one place.
  */
-export const LOGIN_CTA: NavLink = navigationData.loginCta
+export const LOGIN_CTA: NavLink = resolveLink(navigationData.loginCta)
 
 /**
  * The products the brand layer points visitors at. Each live product sits on
  * its own subdomain, so those entries are external; pricing is a page on the
  * brand site and stays a placeholder until it exists.
  */
-export const PRODUCT_LINKS: readonly NavLink[] = navigationData.footer.products.links
+export const PRODUCT_LINKS: readonly NavLink[] = resolveLinks(navigationData.footer.products.links)
 
 /**
  * Reading, evidence, and hiring. The blog runs on its own subdomain and the
  * career page is the LinkedIn company page, so both leave the site.
  */
-export const RESOURCE_LINKS: readonly NavLink[] = navigationData.footer.resources.links
+export const RESOURCE_LINKS: readonly NavLink[] = resolveLinks(
+  navigationData.footer.resources.links,
+)
 
 /** Legal link shown on the right of the footer's bottom bar. */
-export const PRIVACY_LINK: NavLink = navigationData.privacy
+export const PRIVACY_LINK: NavLink = resolveLink(navigationData.privacy)
 
 /**
  * Legal reading. The privacy policy heads this column rather than being
@@ -94,14 +139,16 @@ export const PRIVACY_LINK: NavLink = navigationData.privacy
  */
 export const DISCLAIMER_LINKS: readonly NavLink[] = [
   PRIVACY_LINK,
-  ...navigationData.footer.disclaimer.links,
+  ...resolveLinks(navigationData.footer.disclaimer.links),
 ]
 
 /**
  * How the outside contributes: the code of conduct and the contributing
  * guidelines, both placeholders until the published pages exist.
  */
-export const COMMUNITY_LINKS: readonly NavLink[] = navigationData.footer.community.links
+export const COMMUNITY_LINKS: readonly NavLink[] = resolveLinks(
+  navigationData.footer.community.links,
+)
 
 /**
  * The three middle footer columns, in render order. Each entry is one column

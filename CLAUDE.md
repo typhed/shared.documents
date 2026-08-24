@@ -37,6 +37,12 @@ alongside new JSON, never a hardcoded value of its own.
 | `brand/tokens/spacing.json` | Container, gutters, radius |
 | `brand/tokens/typography.json` | Font stacks and the CSS variables each app must expose |
 
+A link in `navigation.json` is written from the brand site's point of view: a page `typhed.com` hosts is stored as the
+path it has there, starting with `/`. `brand/index.ts` expands every one of those against `url` in `site.json`, because
+the header and the footer also render on the product subdomains, where a root-relative path would resolve against the
+wrong host. Never write the domain into a link, and never assume the `href` a component receives is the string sitting
+in the JSON.
+
 When you change a token value, update its documentation in `docs/design/` in the same commit. The YAML files there record
 the computed hex, where each token is used, and which baked assets carry a hardcoded copy that must be changed by hand.
 

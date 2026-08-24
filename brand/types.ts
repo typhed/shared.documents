@@ -12,6 +12,11 @@
  * and the footer marks such a link with a trailing arrow glyph. Placeholder
  * destinations use `href: "#"` until the real route or section exists, so
  * markup and intent stay in one place.
+ *
+ * In the JSON, an `href` beginning with `/` is a page the brand layer hosts,
+ * written as the path it has on `typhed.com`. What a component receives is
+ * the absolute URL, because `index.ts` runs every link through
+ * `resolveBrandHref` so the destination is the same from every property.
  */
 export type NavLink = {
   label: string
