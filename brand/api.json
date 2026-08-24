@@ -1,0 +1,10 @@
+{
+  "_comment": "The account and entitlement backend (typhed/typhed.project.data) is the only server in the ecosystem, because typhed.com is a static export with no runtime. Every property calls it cross-origin, so the origins allowed to do so are written down here rather than in the service. The service echoes an exact match from allowedOrigins and never a wildcard, and sends no credentials - authentication is a bearer token, not a cookie. Development origins are deliberately absent: the service adds localhost itself when it is not running in production, and http://localhost has no business in a brand contract.",
+  "baseUrl": "https://api.typhed.com",
+  "allowedOrigins": [
+    "https://typhed.com",
+    "https://www.typhed.com",
+    "https://blog.typhed.com",
+    "https://trading.typhed.com"
+  ]
+}
