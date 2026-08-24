@@ -23,8 +23,8 @@ only.
 ## Scope
 
 This property is [the product / the blog / ...]. Brand-level content belongs on `typhed.com`, not here, and anything
-belonging to a different product belongs in that product. When in doubt, the PRD linked from the brand context settles
-it.
+belonging to a different product belongs in that product. When in doubt, [docs/PRD.md](docs/PRD.md) settles it: this
+repository's own requirements document, which governs this property and no other.
 
 [Anything this property is deliberately NOT: no marketing pages, no pricing, no legal content, whatever applies.]
 

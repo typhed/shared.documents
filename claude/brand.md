@@ -19,12 +19,16 @@ security. The architecture is a domain and subdomain model:
     architecture, UX, and design. `blog.typhed.com` carries the blog, product notes, and example
     documentation. `trading.typhed.com` is the trading product.
 
-The full product requirements document is
-[docs/brand/PRD.md](https://github.com/typhed/shared.documents/blob/master/docs/brand/PRD.md), and the
-hosting and DNS shape is in
-[docs/brand/subdomain-model.md](https://github.com/typhed/shared.documents/blob/master/docs/brand/subdomain-model.md).
-Read the PRD before adding a page, a route, or a feature: most "does this belong here?" questions are
-answered there and nowhere in the code.
+There is no ecosystem-wide product requirements document. Every property keeps its own, in its own
+repository, at `docs/PRD.md`, because what belongs on the brand layer and what belongs in a product
+are different questions. Read the `docs/PRD.md` of the repository you are working in before adding a
+page, a route, or a feature: most "does this belong here?" questions are answered there and nowhere
+in the code.
+
+What is shared is the shape of the ecosystem, not its requirements. The hosting and DNS model is in
+[docs/brand/subdomain-model.md](https://github.com/typhed/shared.documents/blob/master/docs/brand/subdomain-model.md),
+and a new property starts its own PRD from
+[templates/nextjs-subdomain/PRD.md](https://github.com/typhed/shared.documents/blob/master/templates/nextjs-subdomain/PRD.md).
 
 The rule that follows from the model: **a feature that belongs to one product does not belong on the
 brand layer, and brand-level content does not belong inside a product.** Build the path from discovery

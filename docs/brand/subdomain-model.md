@@ -6,8 +6,8 @@
 
 <div align = "justify">
 
-How the TyPhed ecosystem is laid out across domains, repositories, and hosts. [PRD.md](PRD.md) says what belongs on the
-brand layer and what belongs in a product; this page says where each one physically lives and why.
+How the TyPhed ecosystem is laid out across domains, repositories, and hosts. Each property's own `docs/PRD.md` says
+what belongs on that property; this page says where each one physically lives and why.
 
 ## The Shape
 
@@ -73,7 +73,8 @@ repositories, and must never be given a `NEXT_PUBLIC_` name.
 ## Adding A New Subdomain
 
   1. Create the repository and start from
-     [templates/nextjs-subdomain/](https://github.com/typhed/shared.documents/tree/master/templates/nextjs-subdomain).
+     [templates/nextjs-subdomain/](https://github.com/typhed/shared.documents/tree/master/templates/nextjs-subdomain),
+     which carries the `docs/PRD.md` skeleton the new property fills in for itself.
   2. Add both shared repositories as submodules and wire the workspace, per
      [MIGRATION.md](https://github.com/typhed/shared.documents/blob/master/MIGRATION.md).
   3. Put the subdomain in `public/CNAME` and keep `.nojekyll`.

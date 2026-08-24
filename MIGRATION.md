@@ -68,8 +68,9 @@ Confirm `.gitmodules` records the branch for both. Without `branch`, `--remote` 
 ### 2. Delete What Moved
 
 Remove the local copies now served by the submodules: the `packages/` directory, the design and component
-documentation, the PRD, and the brand artwork under `public/`. Use `git rm -r` so the removals are staged and stay
-recoverable from history.
+documentation, and the brand artwork under `public/`. Use `git rm -r` so the removals are staged and stay recoverable
+from history. Keep `docs/PRD.md` where it is: a property's requirements document governs that property alone and stays
+in its repository.
 
 ### 3. Point The Workspace At The Submodules
 

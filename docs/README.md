@@ -13,8 +13,11 @@ inferring the rule from one site's code.
 
 | Page | Covers |
 | :---: | --- |
-| [brand/PRD.md](brand/PRD.md) | The product requirements document: what the ecosystem is for, what belongs on the brand layer, and the principles behind it |
 | [brand/subdomain-model.md](brand/subdomain-model.md) | The domain and subdomain architecture: DNS, one repository per property, custom domains, and single sign-on across them |
+
+The product requirements documents are not here. Each property keeps its own at `docs/PRD.md` in its own repository,
+because what belongs on the brand layer and what belongs in a product are different questions with different answers. A
+new property starts from [templates/nextjs-subdomain/PRD.md](../templates/nextjs-subdomain/PRD.md).
 
 ## 🎨 Design System
 
@@ -37,7 +40,7 @@ repository is what lets a documentation fix ride along with the change that caus
 ## 🤖 Notes For Agents
 
   * These pages describe the brand across every property. A rule that applies to one site belongs in that site's own
-    documentation, not here.
+    documentation, not here. That is why the PRDs live in the repositories they govern.
   * The design YAML files record file paths as they appear **from a consuming repository**, for example
     `shared/components/packages/ui/components/site-footer.tsx`. That is where the developer actually works.
   * A colour, spacing, or type change is never only a documentation change. Update the JSON token, the YAML reference,

@@ -25,7 +25,7 @@ implementation. This repository holds the contract; that one renders it.
 | [brand/](brand) | The `@typhed/brand` package: site copy, navigation, footer links, social links, launch schedule, design tokens | Every app, as a workspace package |
 | [brand/tokens/](brand/tokens) | Colour, spacing, and typography values as JSON | The shared Tailwind preset |
 | [assets/brand/](assets/brand) | The mark, the lockup, and the full favicon set | Every app, through the sync script |
-| [docs/brand/](docs/brand) | The PRD and the domain / subdomain model | Humans and agents |
+| [docs/brand/](docs/brand) | The domain / subdomain model | Humans and agents |
 | [docs/design/](docs/design) | The colour, spacing, and typography references | Humans and agents |
 | [claude/](claude) | `CLAUDE.md` fragments imported by every repository | Claude Code, every session |
 | [scripts/](scripts) | The sync that copies brand assets and generates the theme stylesheet | Every app, before dev and build |
@@ -99,7 +99,8 @@ contract hands out is built from it.
 
 A commit here changes every TyPhed property at once. Treat it accordingly:
 
-  * A value that is right for only one site does not belong in the contract. Put it in that site.
+  * A value that is right for only one site does not belong in the contract. Put it in that site. This is why each
+    property's PRD lives in the repository it governs, and only the template for one lives here.
   * Renaming or removing an export from `@typhed/brand` is a breaking change for every consumer. Add first, migrate, then
     remove.
   * Nothing here is secret. This repository is public and its contents ship to browsers.
