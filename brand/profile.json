@@ -1,0 +1,90 @@
+{
+  "_comment": "The ecosystem-wide user profile. Every field here must be product-neutral: it is asked once, on typhed.com, and read by every product. A field only one product needs belongs in that product's own table, or 'the account layer is shared' becomes 'everything behind a login lives here' within two quarters. storage says where a value is kept - 'column' is a real column on profile.user_profiles_mw, 'attribute' is a key inside its attributes jsonb. Adding an attribute field is a commit to this file with no migration; a field earns promotion to a column when it is filtered on, sorted on, read by another service, or needs a database constraint. The API rejects any key not listed here with a 422, which is what keeps the jsonb from becoming a dumping ground.",
+  "schemaVersion": 1,
+  "completionThreshold": 0.7,
+  "_thresholdComment": "Fraction of total weight a profile must reach before it counts as complete. The crossing is stamped once into profile_completed_at and never recomputed, so adding a field below cannot un-complete an account that already finished. Bump schemaVersion when you genuinely do want to re-prompt everyone.",
+  "fields": [
+    {
+      "key": "displayName",
+      "label": "Display Name",
+      "help": "How your name appears across TyPhed products.",
+      "type": "string",
+      "storage": "column",
+      "column": "display_name",
+      "maxLength": 120,
+      "weight": 3
+    },
+    {
+      "key": "headline",
+      "label": "Headline",
+      "help": "One line about what you do.",
+      "type": "string",
+      "storage": "column",
+      "column": "headline",
+      "maxLength": 200,
+      "weight": 2
+    },
+    {
+      "key": "countryCode",
+      "label": "Country",
+      "help": "Used for currency and regional defaults, never for tracking.",
+      "type": "country",
+      "storage": "column",
+      "column": "country_code",
+      "weight": 2
+    },
+    {
+      "key": "timezone",
+      "label": "Time Zone",
+      "help": "Used to render timestamps in your local time.",
+      "type": "timezone",
+      "storage": "attribute",
+      "weight": 1
+    },
+    {
+      "key": "professionalRole",
+      "label": "Role",
+      "help": "Shapes which products TyPhed suggests to you.",
+      "type": "enum",
+      "storage": "attribute",
+      "options": [
+        "student",
+        "engineer",
+        "analyst",
+        "researcher",
+        "trader",
+        "founder",
+        "educator",
+        "other"
+      ],
+      "weight": 2
+    },
+    {
+      "key": "organization",
+      "label": "Organization",
+      "help": "Where you work or study. Optional.",
+      "type": "string",
+      "storage": "attribute",
+      "maxLength": 160,
+      "weight": 1
+    },
+    {
+      "key": "websiteUrl",
+      "label": "Website",
+      "help": "A personal site, portfolio or profile.",
+      "type": "url",
+      "storage": "attribute",
+      "maxLength": 512,
+      "weight": 1
+    },
+    {
+      "key": "bio",
+      "label": "About You",
+      "help": "A short paragraph, shown only where you choose to share it.",
+      "type": "text",
+      "storage": "attribute",
+      "maxLength": 1000,
+      "weight": 2
+    }
+  ]
+}
