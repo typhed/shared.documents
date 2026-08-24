@@ -423,11 +423,11 @@ usage:
 
   footer_surface:
     file: "shared/components/packages/ui/components/site-footer.tsx"
-    description: "Footer grid, 20 / 30 / 30 / 20 on lg: brand column (BrandLockup alone), PRODUCTS and RESOURCES nav columns, and the contact column."
+    description: "Footer grid, five equal columns on lg: brand column (BrandLockup alone), the PRODUCTS, RESOURCES and DISCLAIMER-over-COMMUNITY link columns, and the contact column."
     background: "bg-card with gradient-to-b from-brand/5 to-brand-2/5  (faint on-brand wash)"
     top_border: "border-border"
     bottom_bar_border: "border-border"
-    column_headings: "text-foreground  (nav columns, contact, social connect - the brand column has no heading)"
+    column_headings: "text-foreground  (every link group, contact, social connect - the brand column has no heading)"
     nav_link_resting: "text-muted-foreground"
     nav_link_hover: "hover:text-brand"
     external_link_arrow: "currentColor  (no token of its own; it inherits the link colour and hovers with the label)"

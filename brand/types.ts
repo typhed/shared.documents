@@ -19,11 +19,18 @@ export type NavLink = {
   external?: boolean
 }
 
-/** A titled group of links rendered as one footer column. */
+/** A titled group of links rendered under one footer heading. */
 export type FooterColumn = {
   heading: string
   links: readonly NavLink[]
 }
+
+/**
+ * One column of the footer grid. A column usually holds a single group, but
+ * it may stack two under one another (DISCLAIMER over COMMUNITY) when the
+ * grid has fewer columns than the brand has link groups.
+ */
+export type FooterColumnGroup = readonly FooterColumn[]
 
 /** A contact or social destination rendered as an icon in the footer. */
 export type SocialLink = {

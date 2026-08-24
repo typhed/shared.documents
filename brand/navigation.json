@@ -23,6 +23,18 @@
           "external": true
         }
       ]
+    },
+    "disclaimer": {
+      "_comment": "Privacy Policy is not repeated here. The `privacy` entry below is its one source, and index.ts prepends it to this column so the column and the bottom bar can never point at different pages.",
+      "heading": "DISCLAIMER",
+      "links": [{ "label": "Legal Disclaimer", "href": "#" }]
+    },
+    "community": {
+      "heading": "COMMUNITY",
+      "links": [
+        { "label": "Code of Conduct", "href": "/permalink/conduct.html" },
+        { "label": "Contributing Guidelines", "href": "#" }
+      ]
     }
   },
   "social": [

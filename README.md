@@ -53,7 +53,7 @@ packages:
 Then import the contract exactly as if it were local:
 
 ```tsx
-import { SITE, FOOTER_COLUMNS, NAV_LINKS } from "@typhed/brand"
+import { SITE, FOOTER_COLUMN_GROUPS, NAV_LINKS } from "@typhed/brand"
 ```
 
 The complete bootstrap, including the CI workflow and the `CLAUDE.md` skeleton, is in

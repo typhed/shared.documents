@@ -121,7 +121,7 @@ container:
 breakpoints:
   sm: "640px   - the main size step-up: gaps, tile sizes, font sizes, footer grid to 2 columns"
   md: "768px   - the navigation switch: desktop nav and auth slot appear, hamburger disappears"
-  lg: "1024px  - footer grid to its ten track 20 / 30 / 30 / 20 split"
+  lg: "1024px  - footer grid to its five equal columns"
   xl: "1280px  - unused on the site today"
   "2xl": "1536px  - unused as a variant; 1400px is the container cap, a different number"
   responsive_pattern: >
@@ -147,15 +147,17 @@ horizontal:
 
   footer_grid:
     file: "shared/components/packages/ui/components/site-footer.tsx"
-    grid: "grid-cols-1 -> sm:grid-cols-2 -> lg:grid-cols-10"
+    grid: "grid-cols-1 -> sm:grid-cols-2 -> lg:grid-cols-5"
     gap: "gap-10 (2.5rem) both axes"
     lg_split: >
-      20 / 30 / 30 / 20, written as spans of ten equal tracks: brand
-      lg:col-span-2, each of the two nav columns lg:col-span-3, contact
-      lg:col-span-2. The ten tracks exist only to make those percentages
-      exact. Move the split by editing the spans, never by adding a width.
-    brand_column: "sm:col-span-2 lg:col-span-2, flex items-center - the lockup centres against the taller nav columns"
+      Five equal columns, one fifth each: brand, PRODUCTS, RESOURCES,
+      DISCLAIMER over COMMUNITY, contact. No column carries a span of its
+      own; the brand column only resets the sm:col-span-2 it needs on the
+      two column layout. A sixth block of content stacks inside a column
+      rather than claiming a track, and never by adding a width.
+    brand_column: "sm:col-span-2 lg:col-span-1, flex items-center - the lockup centres against the taller link columns"
     column_internals:
+      stacked_groups: "flex flex-col gap-8 (2rem) - between DISCLAIMER and COMMUNITY inside one column"
       heading_to_links: "mt-4 (1rem)"
       link_stack: "flex flex-col gap-3 (0.75rem)"
       link_row: "inline-flex w-fit items-center gap-1 (0.25rem) - w-fit keeps the hover target on the text"
@@ -289,7 +291,7 @@ sizes:
 
   brand:
     mark: "h-9 w-9 (36px) img, gap-3 to the wordmark - shared/components/packages/ui/components/brand-mark.tsx"
-    lockup: "h-auto w-auto by default; the footer sets w-48 (12rem) -> sm:w-56 (14rem)"
+    lockup: "h-auto w-auto by default; the footer sets w-48 (12rem) -> sm:w-56 (14rem) -> lg:w-40 (10rem) -> xl:w-48 -> 2xl:w-56, stepping down where a fifth of the container is narrower than the artwork"
 
   social_icon_button:
     file: "shared/components/packages/ui/components/site-footer.tsx"

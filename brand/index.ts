@@ -13,12 +13,13 @@
 import launchData from "./launch.json"
 import navigationData from "./navigation.json"
 import siteData from "./site.json"
-import type { Copyright, FooterColumn, NavLink, Site, SocialLink } from "./types"
+import type { Copyright, FooterColumnGroup, NavLink, Site, SocialLink } from "./types"
 
 export type {
   ColorTokens,
   Copyright,
   FooterColumn,
+  FooterColumnGroup,
   NavLink,
   Site,
   SocialLink,
@@ -83,20 +84,37 @@ export const PRODUCT_LINKS: readonly NavLink[] = navigationData.footer.products.
  */
 export const RESOURCE_LINKS: readonly NavLink[] = navigationData.footer.resources.links
 
-/**
- * The two middle footer columns. The brand column (the lockup alone) and the
- * Contact column are rendered separately, as they hold non-list content.
- */
-export const FOOTER_COLUMNS: readonly FooterColumn[] = [
-  {
-    heading: navigationData.footer.products.heading,
-    links: PRODUCT_LINKS,
-  },
-  {
-    heading: navigationData.footer.resources.heading,
-    links: RESOURCE_LINKS,
-  },
-]
-
 /** Legal link shown on the right of the footer's bottom bar. */
 export const PRIVACY_LINK: NavLink = navigationData.privacy
+
+/**
+ * Legal reading. The privacy policy heads this column rather than being
+ * repeated in `navigation.json`, so the column and the bottom bar link can
+ * never end up pointing at different pages.
+ */
+export const DISCLAIMER_LINKS: readonly NavLink[] = [
+  PRIVACY_LINK,
+  ...navigationData.footer.disclaimer.links,
+]
+
+/**
+ * How the outside contributes: the code of conduct and the contributing
+ * guidelines, both placeholders until the published pages exist.
+ */
+export const COMMUNITY_LINKS: readonly NavLink[] = navigationData.footer.community.links
+
+/**
+ * The three middle footer columns, in render order. Each entry is one column
+ * of the grid: PRODUCTS and RESOURCES carry a single group each, and the third
+ * stacks DISCLAIMER over COMMUNITY so the footer keeps five equal columns. The
+ * brand column (the lockup alone) and the Contact column are rendered
+ * separately, as they hold non-list content.
+ */
+export const FOOTER_COLUMN_GROUPS: readonly FooterColumnGroup[] = [
+  [{ heading: navigationData.footer.products.heading, links: PRODUCT_LINKS }],
+  [{ heading: navigationData.footer.resources.heading, links: RESOURCE_LINKS }],
+  [
+    { heading: navigationData.footer.disclaimer.heading, links: DISCLAIMER_LINKS },
+    { heading: navigationData.footer.community.heading, links: COMMUNITY_LINKS },
+  ],
+]
