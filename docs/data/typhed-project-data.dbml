@@ -1,0 +1,449 @@
+project typhed_project_data {
+  database_type: 'postgresql'
+  note: '''
+  # TyPhed Project Data
+
+  The account and entitlement database for the TyPhed ecosystem, owned by the
+  `typhed/typhed.project.data` service. It is the only server-side datastore in
+  the ecosystem, because `typhed.com` is a static export on GitHub Pages with no
+  runtime of its own.
+
+  ## Schema Layout
+
+  Four schemas in one database, one Alembic migration tree, cross-schema foreign
+  keys all anchored on `identity.clerk_users_mw.clerk_id`.
+
+  | Schema | Holds | Written By |
+  |:-------|:------|:-----------|
+  | `identity` | Mirrored Clerk identity, login history, webhook ledger | Signed webhook only |
+  | `profile` | The ecosystem-wide user profile | The authenticated user |
+  | `catalog` | Products, grants and the entitlement audit trail | Payment webhook or admin |
+
+  ## Naming Conventions
+
+  - `_mw` suffix marks a master table, `_tx` an append-only transactional one.
+  - Constraints follow `pk_<table>`, `uq_<table>_<column>`,
+    `fk_<table>_<column>_<referred_table>`, `ck_<table>_<constraint>`,
+    `ix_<column_label>`.
+  - Enumerations are stored as `varchar(32)` guarded by a `check` constraint,
+    never as a native PostgreSQL `enum`. Adding a payment provider is then
+    ordinary DDL rather than an `alter type`.
+
+  ## Who Writes What
+
+  Ownership is the organising principle of the whole design. A browser may author
+  profile answers and nothing else. Identity moves only when a Svix-signed Clerk
+  webhook says so, and an entitlement moves only on a signed payment callback or
+  an explicit administrative action.
+
+  ## Privacy Constraints
+
+  TyPhed never tracks or shares user data, which has concrete consequences here:
+
+  - `identity.login_events_tx` stores a timestamp, a Clerk session id and the
+    origin subdomain. **No IP address, no user-agent, no geolocation.** The
+    origin names one of our own products, not a person.
+  - No payment instrument is stored anywhere. `catalog.user_products_mw` keeps a
+    provider customer id and a status, which is enough to reconcile and nothing
+    worth stealing.
+  - Deletion is soft for identity and hard for content. Every user-owned row is
+    removed outright and the identity row is retained as a tombstone with every
+    personal column nulled, so the id can never be reused.
+  '''
+}
+
+table identity.clerk_users_mw {
+  clerk_id                varchar(255)  [pk]                    // pk_clerk_users_mw
+  email_id                varchar(320)  [null, unique]          // ix_identity_clerk_users_mw_email_id · unique
+  username                varchar(255)  [null, unique]          // ix_identity_clerk_users_mw_username · unique
+  first_name              varchar(255)  [null]
+  last_name               varchar(255)  [null]
+  full_name               varchar(512)  [null]
+  image_url               varchar(2048) [null]
+  primary_email_verified  boolean       [null]
+  provisioned_by          varchar(32)   [not null]              // ck_clerk_users_mw_provisioned_by · webhook | jit
+  clerk_updated_at        timestamptz   [null]
+  deleted_at              timestamptz   [null]                  // ix_identity_clerk_users_mw_deleted_at
+  synced_at               timestamptz   [not null, default: now()]
+  created_at              timestamptz   [not null, default: now()]
+  updated_at              timestamptz   [not null, default: now()]
+
+  note: '''
+  ## Clerk Identity Anchor (`mw` = Master)
+
+  The mirrored Clerk identity and the anchor every other schema references. This
+  table is the single source of truth for whether a user exists.
+
+  ### Relationships
+
+  - **Referenced by** `identity.login_events_tx.clerk_id`,
+    `profile.user_profiles_mw.clerk_id`, `catalog.user_products_mw.clerk_id` and
+    `catalog.user_product_events_tx.clerk_id`, all
+    (`on update no action`, `on delete cascade`).
+  - Deliberately **not** referenced by `identity.webhook_events_tx`, which must
+    outlive a purge so that retries of a user's own deletion stay idempotent.
+
+  ### Check Constraints
+
+  - `ck_clerk_users_mw_provisioned_by` - `webhook` when a Clerk event created the
+    row, `jit` when the first authenticated request did.
+
+  ### Nullability
+
+  Every column except `clerk_id` is nullable, and that is deliberate. Clerk
+  treats usernames and names as optional, and a row provisioned just-in-time from
+  a session token knows only the `sub` claim, so a `not null` anywhere else turns
+  an ordinary sign-up into a failed webhook delivery.
+
+  ### The Two Guards
+
+  - `clerk_updated_at` is the payload's own `updated_at`, never the delivery
+    timestamp. Svix delivers at least once and may reorder, so an upsert carrying
+    an older value than the stored one is discarded rather than applied.
+  - `deleted_at` is the tombstone. Every upsert carries
+    `where deleted_at is null`, so a `user.updated` arriving after a
+    `user.deleted` cannot resurrect the account. A returning user is issued a
+    fresh Clerk id, so the tombstone never blocks a legitimate return.
+
+  ### Backfill
+
+  A row whose `email_id` is null is a skeleton awaiting enrichment, filled in by
+  the next `user.updated` or by a one-time backfill against the Clerk API.
+  '''
+}
+
+table identity.login_events_tx {
+  id                bigint        [pk, increment]  // pk_login_events_tx · generated by default as identity
+  clerk_id          varchar(255)  [not null, ref: > identity.clerk_users_mw.clerk_id]  // fk_login_events_tx_clerk_id_clerk_users_mw · on update no action · on delete cascade
+  clerk_session_id  varchar(255)  [not null, unique]  // uq_login_events_tx_clerk_session_id
+  origin            varchar(255)  [null]
+  occurred_at       timestamptz   [not null]
+
+  indexes {
+    (clerk_id, occurred_at)  [name: 'ix_login_events_tx_clerk_id_occurred_at']
+  }
+
+  note: '''
+  ## Login History (`tx` = Transaction)
+
+  One row per completed sign-in, written from the Clerk `session.created`
+  webhook. This table is the privacy position of the whole service made concrete.
+
+  ### Relationships
+
+  - **Parents:** `identity.clerk_users_mw` via
+    `fk_login_events_tx_clerk_id_clerk_users_mw`.
+
+  ### What Is Deliberately Absent
+
+  A row records **when** a sign-in happened, **which Clerk session** it was, and
+  **which of our own subdomains** it landed on. There is no IP address, no
+  user-agent, no device fingerprint and no geolocation, because the brand claim
+  is that TyPhed never tracks users and a claim that holds only until it is
+  inconvenient is not a claim. The `origin` value identifies a product, not a
+  person. A test asserts this table has exactly five columns.
+
+  ### Composite Indexes
+
+  - `ix_login_events_tx_clerk_id_occurred_at`: (`clerk_id`, `occurred_at`) -
+    supports keyset pagination of one user's history. The single-column index on
+    `clerk_id` is deliberately omitted, since this one already covers it as its
+    leftmost column.
+
+  ### Deduplication
+
+  `clerk_session_id` is unique so a redelivered event is discarded with
+  `on conflict do nothing`, rather than by a read that could race a concurrent
+  delivery.
+
+  ### Origin Stamping
+
+  Clerk's `session.created` payload does not carry the origin, so the row is
+  written with `origin` null and the first authenticated call from that session
+  fills it in from the token's `azp` claim.
+  '''
+}
+
+table identity.webhook_events_tx {
+  id              bigint        [pk, increment]  // pk_webhook_events_tx · generated by default as identity
+  source          varchar(32)   [not null]       // ck_webhook_events_tx_source · clerk | stripe | razorpay | paddle | lemon_squeezy
+  external_id     varchar(255)  [not null]
+  event_type      varchar(128)  [not null]       // ix_identity_webhook_events_tx_event_type
+  subject_id      varchar(255)  [null]           // ix_identity_webhook_events_tx_subject_id
+  payload_digest  varchar(64)   [null]
+  attempts        integer       [not null, default: 0]
+  received_at     timestamptz   [not null, default: now()]
+  processed_at    timestamptz   [null]
+
+  indexes {
+    (source, external_id)  [unique, name: 'uq_webhook_events_tx_delivery']
+  }
+
+  note: '''
+  ## Webhook Delivery Ledger (`tx` = Transaction)
+
+  Provider-agnostic record of every inbound webhook delivery, used to make
+  processing idempotent. Clerk uses it today and the payment provider will use it
+  unchanged.
+
+  ### Relationships
+
+  - **No foreign key to the user, by design.** The ledger has to outlive a purge,
+    or a retry of a user's own deletion would fail against the very rows that
+    deletion removed.
+
+  ### Composite Unique Constraints
+
+  - `uq_webhook_events_tx_delivery`: (`source`, `external_id`) - the idempotency
+    key. Two providers may mint the same event id without colliding, and one
+    provider's event cannot be processed twice.
+
+  ### Check Constraints
+
+  - `ck_webhook_events_tx_source` - which upstream delivered the event.
+
+  ### Claim-Then-Process
+
+  Receipt and completion are separate columns on purpose. Claiming a delivery
+  inserts the row and increments `attempts` but leaves `processed_at` null, so a
+  crash between the claim and the write leaves the event unprocessed and the
+  provider's retry picks it up. Marking it processed is the last thing the
+  handler does. Reversing that order turns any mid-handler failure into permanent
+  silent data loss, because the retry is then discarded as a duplicate.
+
+  ### Naming
+
+  `subject_id` rather than `clerk_object_id`: the table serves payment providers
+  too, and a Clerk-specific column name on a Stripe row would be a lie. It is a
+  plain index and **not** unique - one subject emits many events, and
+  `user.created` and `user.updated` carry the same object id.
+  '''
+}
+
+table profile.user_profiles_mw {
+  clerk_id                 varchar(255)  [pk, ref: > identity.clerk_users_mw.clerk_id]  // pk_user_profiles_mw · fk_user_profiles_mw_clerk_id_clerk_users_mw · on update no action · on delete cascade
+  display_name             varchar(120)  [null]
+  headline                 varchar(200)  [null]
+  country_code             varchar(2)    [null]
+  attributes               jsonb         [not null, default: `'{}'::jsonb`]
+  completion_percent       integer       [not null, default: 0]  // ck_user_profiles_mw_completion_percent_range
+  profile_completed_at     timestamptz   [null]
+  onboarding_dismissed_at  timestamptz   [null]
+  profile_schema_version   integer       [not null, default: 1]
+  created_at               timestamptz   [not null, default: now()]
+  updated_at               timestamptz   [not null, default: now()]
+
+  note: '''
+  ## User Profile (`mw` = Master)
+
+  The one table in this database a browser may write, by authenticated `patch`.
+  One row per user, keyed on the identity anchor itself.
+
+  ### Relationships
+
+  - **Parents:** `identity.clerk_users_mw` via
+    `fk_user_profiles_mw_clerk_id_clerk_users_mw`.
+
+  ### Check Constraints
+
+  - `ck_user_profiles_mw_completion_percent_range` - `completion_percent` stays
+    between 0 and 100.
+
+  ### Hybrid Storage
+
+  The field contract lives in `brand/profile.json`, where each field declares
+  `"storage": "column"` or `"storage": "attribute"`. A promoted field maps to a
+  real column here; everything else lives in `attributes`. Adding an attribute
+  field is a commit to the contract with no migration at all. A field earns
+  promotion to a column when it is filtered on, sorted on, read by another
+  service, or needs a database constraint.
+
+  The API rejects any key the contract does not declare with a `422`, which is
+  what keeps `attributes` from becoming a dumping ground.
+
+  ### Why Completion Is Stored And Not Computed
+
+  `profile_completed_at` is stamped once, when the weighted score first crosses
+  the contract's threshold, and never cleared. This is not redundancy. If
+  completion were derived from the contract on every read, adding a single field
+  to `brand/profile.json` would retroactively un-complete every account in the
+  system and re-open the onboarding wizard for the entire user base at once - a
+  JSON commit with no code change, quietly becoming a support incident.
+
+  `profile_schema_version` is the deliberate escape hatch for when you genuinely
+  do want to re-prompt everyone. The server decides whether onboarding is
+  required; the client never recomputes the threshold.
+  '''
+}
+
+table catalog.products_mw {
+  product_id   varchar(64)   [pk]  // pk_products_mw
+  name         varchar(200)  [not null]
+  subdomain    varchar(255)  [not null]
+  description  text          [null]
+  is_paid      boolean       [not null, default: false]
+  is_active    boolean       [not null, default: true]
+  created_at   timestamptz   [not null, default: now()]
+  updated_at   timestamptz   [not null, default: now()]
+
+  note: '''
+  ## Product Catalogue (`mw` = Master)
+
+  The products in the ecosystem, mirrored from `brand/products.json` so the
+  database can hold foreign keys against a catalogue that is authored in the
+  brand contract.
+
+  ### Relationships
+
+  - **Referenced by** `catalog.user_products_mw.product_id` via
+    `fk_user_products_mw_product_id_products_mw` and
+    `catalog.user_product_events_tx.product_id` via
+    `fk_user_product_events_tx_product_id_products_mw`, both
+    (`on update no action`, `on delete no action`).
+
+  ### Seeded Values
+
+  Seeded by migration from `shared/documents/brand/products.json` with an
+  upserting insert, so re-running the seed after a contract change converges
+  rather than colliding on the primary key. Currently `blog` and `trading`.
+
+  ### Important Distinction
+
+  `is_paid` says whether the product **ever** charges, not whether a given user
+  is paying. That question is answered by `access_tier` and `status` on
+  `catalog.user_products_mw`.
+
+  A product is deactivated rather than deleted, so a historical grant and its
+  audit trail keep pointing at something that still exists.
+  '''
+}
+
+table catalog.user_products_mw {
+  clerk_id                  varchar(255)  [pk, ref: > identity.clerk_users_mw.clerk_id]  // pk_user_products_mw · fk_user_products_mw_clerk_id_clerk_users_mw · on update no action · on delete cascade
+  product_id                varchar(64)   [pk, ref: > catalog.products_mw.product_id]  // pk_user_products_mw · fk_user_products_mw_product_id_products_mw · on update no action · on delete no action
+  access_tier               varchar(32)   [not null]  // ck_user_products_mw_access_tier · free | trial | paid
+  status                    varchar(32)   [not null]  // ck_user_products_mw_status · active | past_due | cancelled | expired
+  source                    varchar(32)   [not null]  // ck_user_products_mw_source · self_signup | payment_webhook | admin_grant
+  registered_at             timestamptz   [not null, default: now()]
+  started_at                timestamptz   [null]
+  expires_at                timestamptz   [null]  // ix_catalog_user_products_mw_expires_at
+  cancel_at_period_end      boolean       [not null, default: false]
+  provider                  varchar(32)   [null]
+  provider_customer_id      varchar(255)  [null]  // ix_catalog_user_products_mw_provider_customer_id
+  provider_subscription_id  varchar(255)  [null]  // ix_catalog_user_products_mw_provider_subscription_id
+  created_at                timestamptz   [not null, default: now()]
+  updated_at                timestamptz   [not null, default: now()]
+
+  note: '''
+  ## Product Grant (`mw` = Master)
+
+  One user's standing on one product. Never writable by a browser: a grant
+  arrives from a signed payment webhook or an explicit administrative action.
+
+  ### Relationships
+
+  - **Parents:** `identity.clerk_users_mw` and `catalog.products_mw`.
+
+  ### Check Constraints
+
+  - `ck_user_products_mw_access_tier` - what kind of access the user is meant to
+    have.
+  - `ck_user_products_mw_status` - whether that access is currently in force.
+  - `ck_user_products_mw_source` - how the grant arrived. `self_signup` is the
+    only value a browser can cause, and only ever for a free tier.
+
+  ### Registration Is Not Entitlement
+
+  These are different questions and they live in different columns. A user can
+  register interest in a paid product without paying
+  (`access_tier = 'free'`, `status = 'active'`), and a lapsed subscriber keeps
+  their registration while losing entitlement
+  (`access_tier = 'paid'`, `status = 'past_due'`). Collapsing the two into one
+  boolean makes "has an account with us" and "is currently paying"
+  indistinguishable, and makes a lapsed subscriber look like a stranger.
+
+  Entitlement is granted only when the status is `active`, the expiry has not
+  passed, and - on a paid product - the tier is something other than `free`.
+
+  `past_due` is deliberately distinct from `expired`: the first is a payment that
+  failed and may still succeed, the second is access that has ended. Collapsing
+  them loses the window in which a user can be asked to fix their card rather
+  than being told to sign up again.
+
+  ### No Payment Instruments
+
+  Only provider identifiers are stored. Card numbers, expiries and CVVs belong to
+  the payment provider, which already holds them. A test asserts structurally
+  that no column name here resembles a payment instrument.
+
+  ### Upgrades
+
+  The key is `(clerk_id, product_id)`, so an upgrade moves this row rather than
+  adding another. `started_at` records when the relationship began and survives a
+  plan change. The history of every move lives in
+  `catalog.user_product_events_tx`.
+  '''
+}
+
+table catalog.user_product_events_tx {
+  id           bigint        [pk, increment]  // pk_user_product_events_tx · generated by default as identity
+  clerk_id     varchar(255)  [not null, ref: > identity.clerk_users_mw.clerk_id]  // fk_user_product_events_tx_clerk_id_clerk_users_mw · on update no action · on delete cascade
+  product_id   varchar(64)   [not null, ref: > catalog.products_mw.product_id]  // fk_user_product_events_tx_product_id_products_mw · on update no action · on delete no action
+  from_tier    varchar(32)   [null]      // ck_user_product_events_tx_from_tier · free | trial | paid
+  to_tier      varchar(32)   [not null]  // ck_user_product_events_tx_to_tier · free | trial | paid
+  from_status  varchar(32)   [null]      // ck_user_product_events_tx_from_status · active | past_due | cancelled | expired
+  to_status    varchar(32)   [not null]  // ck_user_product_events_tx_to_status · active | past_due | cancelled | expired
+  reason       varchar(255)  [null]
+  actor        varchar(128)  [not null]
+  occurred_at  timestamptz   [not null, default: now()]
+
+  note: '''
+  ## Entitlement Audit Trail (`tx` = Transaction)
+
+  Append-only record of every grant, upgrade, downgrade and revocation. A row is
+  never updated or deleted except when the account itself is deleted.
+
+  ### Relationships
+
+  - **Parents:** `identity.clerk_users_mw` and `catalog.products_mw`.
+
+  ### Why This Table Decides The Stack
+
+  The grant and its audit row are written **in one transaction**. This is the
+  reason the service runs on asyncpg against real PostgreSQL rather than an HTTP
+  database driver with no interactive transactions. An entitlement that moved
+  with no trace is unauditable, and a trace of a move that never happened is
+  worse, because it will be believed. Both become possible the moment the two
+  writes can succeed independently.
+
+  ### Actor
+
+  Who caused the change: a provider name, an operator identifier, or `self` when
+  a user registered themselves for a free tier.
+
+  ### Deletion
+
+  These rows are purged when the account is deleted, along with the grants. They
+  are keyed to a person, and a deletion request that left a record of what that
+  person paid for would not be a deletion.
+  '''
+}
+
+tablegroup identity_owned_by_clerk {
+  identity.clerk_users_mw
+  identity.login_events_tx
+}
+
+tablegroup delivery_ledger {
+  identity.webhook_events_tx
+}
+
+tablegroup owned_by_the_user {
+  profile.user_profiles_mw
+}
+
+tablegroup products_and_money {
+  catalog.products_mw
+  catalog.user_products_mw
+  catalog.user_product_events_tx
+}
