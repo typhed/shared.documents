@@ -46,7 +46,7 @@
 
 meta:
   project: "TyPhed - Engineering Tomorrow"
-  owner: "Debmalya Pramanik HUF"
+  owner: "TyPhed (autonomous brand; no parent entity)"
   source_of_truth: "apps/web/app/layout.tsx (loading) + shared/components/packages/config-tailwind/tailwind.config.js (mapping)"
   body_font: "Inter"
   display_font: "Space Grotesk"
@@ -297,7 +297,7 @@ og_card:
     logo_chip: "32px, weight 700 (the 'T' glyph)"
     wordmark: "128px, weight 700, letterSpacing -0.03em ('Ty' + 'Phed')"
     tagline: "56px ('Engineering Tomorrow'), 8px below the wordmark"
-    footer_row: "26px (legal entity, and 'Launching <LAUNCH_LABEL>')"
+    footer_row: "26px (the domain, and 'Launching <LAUNCH_LABEL>')"
   known_drift: >
     The card approximates the site's type with a system sans and a heavier
     weight than the live page allows. That is a deliberate trade for a

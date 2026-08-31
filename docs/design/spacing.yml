@@ -40,7 +40,7 @@
 
 meta:
   project: "TyPhed - Engineering Tomorrow"
-  owner: "Debmalya Pramanik HUF"
+  owner: "TyPhed (autonomous brand; no parent entity)"
   source_of_truth: "shared/components/packages/config-tailwind/tailwind.config.js + the component classNames listed below"
   scale: "Tailwind default: 1 step = 0.25rem = 4px, on a 16px root"
   custom_spacing_scale: "none - theme.extend defines no `spacing` key"
@@ -57,7 +57,7 @@ scale:
   step: "0.25rem (4px)"
   in_use:
     "0.5": "0.125rem / 2px   - hover lift (-translate-y-0.5) on the ScrollToTop chevron"
-    "1": "0.25rem / 4px    - gap-1 (mobile menu link stack, footer link to its external arrow), px-1 (theme toggle track inset), space-y-1 (copyright lines)"
+    "1": "0.25rem / 4px    - gap-1 (mobile menu link stack, footer link to its external arrow), px-1 (theme toggle track inset)"
     "1.5": "0.375rem / 6px   - gap-1.5 (countdown tiles on mobile), space-y-1.5 (CardHeader)"
     "2": "0.5rem / 8px     - mt-2, mb-2, py-2 - the default micro gap between a label and what it labels"
     "2.5": "0.625rem / 10px  - h-2.5 (launch progress track height)"
@@ -238,7 +238,6 @@ vertical:
     mobile_panel: "py-4 (1rem) on the nav column; links px-3 py-2; auth slot / CTA mt-2"
     footer_body: "container py-16 (4rem)"
     footer_bottom_bar: "container py-6 (1.5rem), gap-4 when stacked below sm"
-    copyright_lines: "space-y-1 (0.25rem) between the two lines"
 
   component_rhythm:
     launch_progress:

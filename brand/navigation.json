@@ -48,15 +48,14 @@
     },
     {
       "label": "Contact",
-      "href": "mailto:pramanik.huf@gmail.com",
+      "href": "mailto:karta@typhed.com",
       "icon": "mail",
       "external": false
     }
   ],
-  "contactEmail": "pramanik.huf@gmail.com",
+  "contactEmail": "karta@typhed.com",
   "privacy": { "label": "Privacy Policy", "href": "#" },
   "copyright": {
-    "line1Template": "Copyright © {year} TyPhed - Engineering Tomorrow",
-    "line2": "This Brand is Maintained and Owned by Debmalya Pramanik HUF"
+    "line1Template": "Copyright © {year} TyPhed - Engineering Tomorrow"
   }
 }

@@ -59,7 +59,7 @@
 
 meta:
   project: "TyPhed - Engineering Tomorrow"
-  owner: "Debmalya Pramanik HUF"
+  owner: "TyPhed (autonomous brand; no parent entity)"
   source_of_truth: "shared/documents/brand/tokens/colors.json"
   token_format: "HSL triplet without hsl() wrapper, e.g. '188 86% 53%'"
   hex_case: "UPPERCASE"
@@ -338,7 +338,7 @@ static_assets:
     wordmark_ty: "#F8FAFC"    # slate-50
     wordmark_phed: "#22D3EE"  # cyan accent
     subtitle: "#CBD5E1"       # slate-300 ('Engineering Tomorrow')
-    muted_text: "#94A3B8"     # slate-400 (eyebrow + legal entity + footer)
+    muted_text: "#94A3B8"     # slate-400 (eyebrow + domain + footer)
     dot_and_launch: "#22D3EE" # cyan status dot + 'Launching ...' text
     logo_chip_ink: "#0B1020"  # 'T' inside the cyan->indigo chip
 
@@ -432,7 +432,7 @@ usage:
     nav_link_hover: "hover:text-brand"
     external_link_arrow: "currentColor  (no token of its own; it inherits the link colour and hovers with the label)"
     brand_lockup: "BrandLockup - per-theme baked artwork (mark + wordmark + 'Engineering Tomorrow' tagline); see brand-lockup.tsx"
-    secondary_text: "text-muted-foreground  (copyright, legal entity)"
+    secondary_text: "text-muted-foreground  (copyright)"
     social_icon_button_resting: "border-border, bg-background/40, text-muted-foreground"
     social_icon_button_hover: "border-brand/50, text-brand"
 

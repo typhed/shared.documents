@@ -9,8 +9,9 @@ domain model, not any single codebase.
 
 ## The Ecosystem
 
-TyPhed is a technology brand owned by **Debmalya Pramanik HUF**, positioned on privacy and data
-security. The architecture is a domain and subdomain model:
+TyPhed is an autonomous technology brand, positioned on privacy and data security. It answers to no
+parent entity, and no owning person or firm is named on any property. The architecture is a domain
+and subdomain model:
 
   * `typhed.com` is the **brand and acquisition layer**: brand positioning, the product ecosystem
     overview, SEO and marketing content, company information, high-level product information, legal

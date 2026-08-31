@@ -26,7 +26,7 @@ export type {
   ThemeTokens,
 } from "./types"
 
-/** Brand identity: name, tagline, legal entity, canonical URL, description. */
+/** Brand identity: name, tagline, canonical URL, description. */
 export const SITE: Site = siteData
 
 /**
@@ -83,12 +83,11 @@ export const LAUNCH_START_DATE = new Date(launchData.startDate)
 export const LAUNCH_LABEL: string = launchData.label
 
 /**
- * Ownership lines for the footer's bottom bar. The year is stamped at module
- * load from `line1Template`, so no annual maintenance is needed.
+ * The ownership line for the footer's bottom bar. The year is stamped at
+ * module load from `line1Template`, so no annual maintenance is needed.
  */
 export const COPYRIGHT: Copyright = {
   line1: navigationData.copyright.line1Template.replace("{year}", String(new Date().getFullYear())),
-  line2: navigationData.copyright.line2,
 }
 
 /**

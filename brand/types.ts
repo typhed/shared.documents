@@ -50,15 +50,13 @@ export type SocialLink = {
 export type Site = {
   name: string
   tagline: string
-  legalEntity: string
   url: string
   description: string
 }
 
-/** The two ownership lines rendered in the footer's bottom bar. */
+/** The ownership line rendered in the footer's bottom bar. */
 export type Copyright = {
   line1: string
-  line2: string
 }
 
 /** One theme's CSS custom property values, as bare HSL triplets. */

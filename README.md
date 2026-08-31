@@ -13,7 +13,7 @@
 
 The single source of truth for everything the TyPhed brand says, shows, and looks like. Every property in the ecosystem
 mounts this repository as a git submodule at `shared/documents/` and reads from it, so a footer link, a brand colour, or
-the legal entity name is written down in exactly one place.
+the copyright line is written down in exactly one place.
 
 Its companion is [typhed/shared.components](https://github.com/typhed/shared.components), which holds the React
 implementation. This repository holds the contract; that one renders it.
@@ -65,7 +65,7 @@ repository onto the shared layer.
 | To change | Edit | Reaches consumers |
 | :---: | --- | :---: |
 | A footer or nav link, social account, contact email | [brand/navigation.json](brand/navigation.json) | Next build |
-| Brand name, tagline, legal entity, canonical URL | [brand/site.json](brand/site.json) | Next build |
+| Brand name, tagline, canonical URL | [brand/site.json](brand/site.json) | Next build |
 | The launch countdown | [brand/launch.json](brand/launch.json) | Next build |
 | A theme colour | [brand/tokens/colors.json](brand/tokens/colors.json) | Next build |
 | The container, gutters, or radius | [brand/tokens/spacing.json](brand/tokens/spacing.json) | Next build |

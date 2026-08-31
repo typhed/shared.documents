@@ -30,7 +30,7 @@ alongside new JSON, never a hardcoded value of its own.
 
 | File | Owns |
 | :---: | --- |
-| `brand/site.json` | Name, tagline, legal entity, canonical URL, description |
+| `brand/site.json` | Name, tagline, canonical URL, description |
 | `brand/navigation.json` | Header nav, login CTA, footer columns, social links, contact email, privacy link, copyright |
 | `brand/launch.json` | Countdown target and the progress bar zero point, as UTC instants with the IST offset applied |
 | `brand/tokens/colors.json` | Both theme palettes as HSL triplets |
